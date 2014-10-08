@@ -10,7 +10,7 @@
 
 .metadata/.plugins/org.eclipse.core.resources/.root/.markers.snap
 
-.metadata/.plugins/org.eclipse.core.resources/.safetable/org.eclipse.core.resources
+.metadata/*
 
 .metadata/.plugins/org.eclipse.core.resources/.snap
 
@@ -29,3 +29,11 @@
 .metadata/.log
 
 Project1/.actionScriptProperties
+
+.metadata/.plugins/org.eclipse.team.cvs.core/.running
+
+*.lock
+
+*.lock
+
+.metadata/.plugins/com.adobe.flexbuilder.codemodel/searchCache/MXMLReferenceIndex/lucene-206fa2e54f0aa344697db0e0ff229077-write.lock
