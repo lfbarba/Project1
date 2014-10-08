@@ -55,13 +55,19 @@ package ga
 		}
 		
 		public function removeLast():Individual {
-			return population.pop() as Individual;
 			fitnessComputed = false;
+			return population.pop() as Individual;	
+		}
+		
+		public function removeFirst():Individual {
+			fitnessComputed = false;
+			return population.shift() as Individual;
+			
 		}
 		
 		public function addElement(bs:Individual):void {
-			this.population.push(bs);
 			fitnessComputed = false;
+			this.population.push(bs);
 		}
 		
 		
