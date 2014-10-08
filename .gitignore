@@ -4,6 +4,8 @@
 
 *.snap
 
+.metadata/*
+
 .metadata/.plugins/org.eclipse.core.resources/.projects/Project1/.syncinfo.snap
 
 .metadata/.plugins/org.eclipse.core.resources/.root/.markers.snap
@@ -19,3 +21,9 @@
 .metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.ui.workbench.prefs
 
 .metadata/.plugins/org.eclipse.core.resources/.projects/Project1/.markers.snap
+
+.metadata/.plugins/com.adobe.flexbuilder.codemodel/searchCache/ASReferenceIndex.index/segments_1
+
+.metadata/.plugins/com.adobe.flexbuilder.codemodel/searchCache/ASReferenceIndex.index/segments.gen
+
+.metadata/.log
