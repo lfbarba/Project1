@@ -6,7 +6,7 @@ package
 	
 	import ga.Population;
 	
-	public class Problem1 extends Sprite
+	public class Problem2 extends Sprite
 	{
 		private var mainPopulation:Population;
 		
@@ -24,7 +24,7 @@ package
 		
 		private var t:Timer;
 		
-		public function Problem1()
+		public function Problem2()
 		{
 			createPopulation();
 			
