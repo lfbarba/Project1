@@ -9,16 +9,15 @@ package
 	public class Problem2 extends Sprite
 	{
 		private var mainPopulation:Population;
-		
 		private var populationSize:uint = 500;
-		private var genomeLength:uint = 50;
+		private var genomeLength:uint = 10;
 		
 		private var mutationProbability:Number = .1;
-		private var crossOverProbability:Number = .7;
+		private var crossOverProbability:Number = .6;
 		
-		private var convergenceTreshhold:Number = .01;
+		private var convergenceTreshhold:Number = .1;
 		
-		private var maxNumGenerations:uint = 200;
+		private var maxNumGenerations:uint = 50;
 		private var numGenerations:uint = 0;
 		
 		
@@ -27,6 +26,7 @@ package
 		public function Problem2()
 		{
 			createPopulation();
+			//this.printGeneration();
 			
 			t = new Timer(1, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
@@ -35,6 +35,8 @@ package
 
 		private function stopProcess():void {
 			t.stop();
+			trace("\n\nFinal Generation");
+			printGeneration();
 			trace("number of generations = ", numGenerations);
 		}
 		
@@ -42,8 +44,8 @@ package
 			if(this.populationHasConverged()){
 				stopProcess();
 			}else{
-				runOneGeneration();
 				printGeneration();
+				runOneGeneration();
 				trace("//////////////////");
 				
 				if(numGenerations == maxNumGenerations){

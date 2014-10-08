@@ -51,7 +51,7 @@ package ga
 		}
 		
 		public function sortByFitness(order:uint = 0):void {
-			population.sortOn("fitness", order);
+			population.sortOn("fitness", order | Array.NUMERIC);
 		}
 		
 		public function removeLast():Individual {
