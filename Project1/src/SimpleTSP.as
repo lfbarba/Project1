@@ -1,17 +1,23 @@
 package
 {
+	import fl.controls.Button;
+	
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.utils.Timer;
 	
+	import ga.PointSet;
 	import ga.Population;
+	import ga.TspPoint;
 	
 	public class SimpleTSP extends Sprite
 	{
 		private var mainPopulation:Population;
 		
 		private var populationSize:uint = 500;
-		private var genomeLength:uint = 50;
+		private var genomeLength:uint;
 		
 		private var mutationProbability:Number = .1;
 		private var crossOverProbability:Number = .7;
@@ -24,13 +30,47 @@ package
 		
 		private var t:Timer;
 		
+		public static var CURRENT_POINTSET:PointSet;
+		
+		private var progressExampleLayer:Sprite;
+		
+		private var startButton:Button;
+		
 		public function SimpleTSP()
 		{
-			createPopulation();
+			var ps:PointSet = new PointSet;
+			this.setPointSet(ps);
 			
 			t = new Timer(1, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
-			t.start();			
+			
+			this.stage.doubleClickEnabled = true;
+			this.stage.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
+			
+			//botton para iniciar
+			startButton = new Button;
+			startButton.x = startButton. y = 20;
+			startButton.label = "Iniciar GA";
+			this.addChild(startButton);
+			startButton.addEventListener(MouseEvent.CLICK, this.startGeneticAlgorithm);
+			
+		}
+		
+		private function doubleClickHandler(e:MouseEvent):void {
+			var p:TspPoint = new TspPoint(e.stageX, e.stageY);
+			CURRENT_POINTSET.addPoint(p);
+		}
+		
+		public function setPointSet(ps:PointSet):void {
+			CURRENT_POINTSET = ps;
+			this.addChild(CURRENT_POINTSET);
+		}
+		
+		private function startGeneticAlgorithm(e:MouseEvent):void {
+			genomeLength = CURRENT_POINTSET.points.length;
+			createPopulation();
+			this.printGeneration();
+			t.start();
 		}
 
 		private function stopProcess():void {
@@ -52,9 +92,6 @@ package
 				}
 				numGenerations++;
 			}
-			this.graphics.beginFill(0);
-			this.graphics.drawCircle(Math.random() * this.stage.stageWidth, Math.random() * this.stage.stageHeight, 5);
-			this.graphics.endFill();
 		}
 		
 		
@@ -62,8 +99,15 @@ package
 			
 		}
 		
+		
+		var counter:uint = 0;
 		private function populationHasConverged():Boolean {
-			return mainPopulation.maximum > 1 - convergenceTreshhold;
+			if(counter < 200){
+				counter++;
+				return false;
+			}else{
+				return true;
+			}
 		}
 		
 		private function printGeneration():void {
@@ -74,8 +118,20 @@ package
 			}
 		}
 		
+		private function showIndividual(p:Individual):void {
+			if(progressExampleLayer != null && this.contains(progressExampleLayer)){
+				this.removeChild(progressExampleLayer);
+			}
+			progressExampleLayer = new Sprite;
+			this.addChild(progressExampleLayer);
+			progressExampleLayer.addChild(p.drawIndividual());
+		}
+		
 		private function runOneGeneration():void {
-			mainPopulation.sortByFitness(Array.DESCENDING);
+			mainPopulation.sortByFitness();
+			//show the best individual so far
+			this.showIndividual(mainPopulation.getElement(0));
+			
 			var n:uint = this.mainPopulation.size;
 			
 			//remove the lowest individuals
@@ -83,7 +139,7 @@ package
 				this.mainPopulation.removeLast();
 			}
 			//crear mutaciones
-			this.createMutations();
+			//this.createMutations();
 			
 			mainPopulation.computePopulationFitness();
 			
@@ -111,7 +167,14 @@ package
 		private function reproduceAndAddToMainPopulation(bs1:Individual, bs2:Individual):void{
 			//cross over or reinstert them into pupulation
 			if(Math.random() < this.crossOverProbability){
-				var children:Array = bs1.partiallyMappedCrossOver(bs2);
+				var children:Array;
+				//select crossover randomly
+				if(Math.random() < .5){
+					children = bs1.orderPartiallyMappedCrossover(bs2);
+				}else{
+					children = bs1.positionBasedCrossOver(bs2);
+				}
+				//
 				var c0:Individual = children[0] as Individual;
 				var c1:Individual = children[1] as Individual;
 				mainPopulation.addElement(c0);
