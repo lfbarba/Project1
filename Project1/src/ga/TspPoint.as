@@ -7,7 +7,7 @@ package ga
 		
 		private var pointLayer:Sprite; 
 		private var color:Number;
-		private var radius:Number = 4;
+		private var radius:Number = 8;
 		public var index:uint;
 		
 		public function TspPoint(xx:Number, yy:Number)
@@ -26,6 +26,10 @@ package ga
 			pointLayer.graphics.beginFill(color, 1);
 			pointLayer.graphics.drawCircle(0, 0, this.radius);
 			pointLayer.graphics.endFill();
+		}
+		
+		override public function toString():String {
+			return "("+this.x+","+this.y+")";
 		}
 	}
 }

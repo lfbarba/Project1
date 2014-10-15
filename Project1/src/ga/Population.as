@@ -1,5 +1,9 @@
 package ga
 {
+	import flash.events.Event;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
+
 	public class Population
 	{
 		private var populationAverage:Number;
@@ -70,6 +74,9 @@ package ga
 			this.population.push(bs);
 		}
 		
+		public function chooseAnIndividualAtRandom():Individual {
+			return this.population[Math.floor(Math.random() * this.size)] as Individual;
+		}
 		
 		public function chooseAnIndividualAtRandomWithFitness():Individual {
 			if(fitnessComputed == false)
@@ -102,7 +109,7 @@ package ga
 			fitnessProbabilitySpace = new Array;
 			var sum:Number = 0;
 			var max:Number = 0;
-			var min:Number = 1;
+			var min:Number = 10000000000000000;
 			for(var i:uint = 0; i< population.length; i++){
 				var bs:Individual = population[i] as Individual;
 				sum += bs.fitness;
@@ -114,6 +121,14 @@ package ga
 			this.populationMaximum = max;
 			this.populationMinimum = min;
 			this.populationSum = sum;
+		}
+		
+		public function printStatistics():void {
+			this.sortByFitness();
+			trace("maximum Element", this.population[0]);
+			trace("maximum = ", this.maximum);
+			trace("average = ", this.average);
+			trace("minimum = ", this.minimum);
 		}
 	}
 }

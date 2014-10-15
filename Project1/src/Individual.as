@@ -24,7 +24,7 @@ package
 		
 		
 		private function computeFitness():void {
-			var totalLength:uint = 0;
+			var totalLength:Number = 0;
 			for(var i:uint = 0; i< this.length; i++){
 				//get the ith point according to the permutation in genome 
 				var current:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[i]] as TspPoint;
@@ -156,8 +156,13 @@ package
 		//mutates with probability p
 		public function mutate(entryMutationProbability:Number = .5):void {
 			for(var i:uint = 0; i< this.length; i++){
-				if(Math.random() < entryMutationProbability)
-					this.genome[i] = 1 - this.genome[i];
+				if(Math.random() < entryMutationProbability){
+					//swap randomly
+					var temp:uint = genome[i];
+					var randomIndex:uint = Math.floor(Math.random() * this.length);
+					genome[i] = genome[randomIndex];
+					genome[randomIndex] = temp;
+				}
 			}
 			computeFitness();
 		}
