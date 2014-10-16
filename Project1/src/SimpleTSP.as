@@ -21,8 +21,8 @@ package
 		private var populationSize:uint = 400;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = .18;
-		private var crossOverProbability:Number = .7;
+		private var mutationProbability:Number = .1;
+		private var crossOverProbability:Number = .8;
 		
 		
 		private var convergenceTreshhold:Number = .000001;
@@ -38,6 +38,9 @@ package
 		private var progressExampleLayer:Sprite;
 		
 		private var visualLayer:Sprite;
+		
+		private var bestIndividual:Individual;
+		private var bestFitness:Number = 0;
 		
 		private var startButton:Button;
 		private var stopButton:Button;
@@ -124,6 +127,9 @@ package
 			t.stop();
 			trace("number of generations = ", numGenerations);
 			mainPopulation.printStatistics();
+			trace("Best fitness", 100000 - this.bestFitness);
+			this.bestFitness = 0;
+			this.bestIndividual = null;
 		}
 		
 		
@@ -136,7 +142,7 @@ package
 				//
 				numGenerations++;
 				if(numGenerations % 50 == 0)
-					trace("Running generation", numGenerations,"Maximum", 1/mainPopulation.maximum);
+					trace("Running generation", numGenerations,"Maximum", 100000 -mainPopulation.maximum);
 			}
 		}
 		
@@ -152,7 +158,7 @@ package
 		}
 		
 		private function printGeneration():void {
-			mainPopulation.sortByFitness(Array.DESCENDING);
+			mainPopulation.sortByFitness(Array.DESCENDING || Array.NUMERIC);
 			for(var i:uint = 0; i< mainPopulation.size; i++){
 				var bs:Individual = mainPopulation.getElement(i);
 				trace(bs.toString());
@@ -165,7 +171,10 @@ package
 			}
 			progressExampleLayer = new Sprite;
 			visualLayer.addChild(progressExampleLayer);
+			if(bestIndividual != null)
+				progressExampleLayer.addChild(this.bestIndividual.drawIndividual(0x0000FF, 6));
 			progressExampleLayer.addChild(p.drawIndividual());
+			
 		}
 		
 		private function runOneGeneration():void {
@@ -174,6 +183,11 @@ package
 			//show the best individual so far
 			if(this.numGenerations % 1 == 0)
 				this.showIndividual(mainPopulation.getElement(0));
+			
+			if(mainPopulation.getElement(0).fitness  >  bestFitness){
+				bestFitness = mainPopulation.getElement(0).fitness;
+				this.bestIndividual = mainPopulation.getElement(0);
+			}
 			mainPopulation.computePopulationFitness();
 			
 			var newPopulation:Population = new Population

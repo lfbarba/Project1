@@ -15,9 +15,9 @@ package ga
 		
 		private var population:Array;
 		
-		public var tournamentSelectionRange:Number = .23;
+		public var tournamentSelectionRange:Number = .22;
 		
-		public var tournamentSelectionProbability:Number = .62;
+		public var tournamentSelectionProbability:Number = .74;
 		
 		private var rankSelectionProbability:Number = .9;
 		
@@ -152,8 +152,7 @@ package ga
 		}
 		
 		public function printStatistics():void {
-			this.sortByFitness();
-			trace("maximum Element", this.population[0]);
+			this.sortByFitness(Array.NUMERIC);
 			trace("minimum = ", 1/this.maximum);
 			trace("average = ", 1/this.average);
 			trace("maximum = ", 1/this.minimum);

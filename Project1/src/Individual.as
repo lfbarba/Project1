@@ -34,12 +34,12 @@ package
 				//summ the distance between current and next
 				totalLength += Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
 			}
-			this.fitness =  1/totalLength;
+			this.fitness =  100000-totalLength;
 		}
 		
-		public function drawIndividual():Sprite {
+		public function drawIndividual(color:Number = 0, thickness:Number = 1):Sprite {
 			var draw:Sprite = new Sprite;
-			draw.graphics.lineStyle(2, 0);
+			draw.graphics.lineStyle(thickness, color);
 			
 			var first:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[0]] as TspPoint;
 			draw.graphics.moveTo(first.x, first.y);
@@ -278,7 +278,7 @@ package
 		}
 		
 		public function toString():String {
-			return this.genome.join(",")+"\nFitness="+(1/this.fitness);
+			return this.genome.join(",")+"\nFitness="+(100000 -this.fitness);
 		}
 	}
 }
