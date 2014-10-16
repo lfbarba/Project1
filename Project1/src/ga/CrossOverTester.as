@@ -39,7 +39,6 @@ package ga
 			
 			a = new Individual(length);
 			b = new Individual(length);
-			trace(a.genome.join(","));
 			this.firstGenome.text = a.genome.join(",");
 			this.secondGenome.text = b.genome.join(",");
 			this.firstChild.text = "";
@@ -49,26 +48,39 @@ package ga
 		
 		private function computeChildrenHandler(e:MouseEvent):void {
 			var children:Array;
+			var itemsFromAInC1:Array = new Array;
+			var itemsFromBInC2:Array= new Array;
 			switch(this.crossOverFunction.selectedItem.value){
 				case 0: 
-					children = a.partiallyMappedCrossover(b, true);
+					children = a.partiallyMappedCrossover(b, true, itemsFromAInC1, itemsFromBInC2);
 					break;
 				case 1: 
-					children = a.partiallyMappedCrossover(b, false);
+					children = a.partiallyMappedCrossover(b, false, itemsFromAInC1, itemsFromBInC2);
 					break;
 				case 2: 
-					children = a.randomInjectionBasedCrossOver(b, true);
+					children = a.randomInjectionBasedCrossOver(b, true, itemsFromAInC1, itemsFromBInC2);
 					break;
-				case 2: 
-					children = a.randomInjectionBasedCrossOver(b, false);
+				case 3: 
+					children = a.randomInjectionBasedCrossOver(b, false, itemsFromAInC1, itemsFromBInC2);
 					break;
 			}
 			
 			var c1:Individual = children[0] as Individual;
 			var c2:Individual = children[1] as Individual;
 			
-			this.firstChild.text = c1.genome.join(",");
-			this.secondChild.text = c2.genome.join(",");
+			
+			for(var i:uint = 0; i < c1.genome.length; i++){
+				if(c1.genome[i] != undefined && itemsFromAInC1[c1.genome[i]] == true){
+					c1.genome[i] = "<b>"+c1.genome[i]+"</b>";
+				}
+				if(c2.genome[i] != undefined && itemsFromBInC2[c2.genome[i]] == true){
+					c2.genome[i] = "<b>"+c2.genome[i]+"</b>";
+				}
+			}
+			
+			
+			this.firstChild.htmlText = c1.genome.join(",");
+			this.secondChild.htmlText = c2.genome.join(",");
 		}
 	}
 }
