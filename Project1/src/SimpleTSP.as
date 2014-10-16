@@ -18,11 +18,11 @@ package
 	{
 		private var mainPopulation:Population;
 		
-		private var populationSize:uint = 300;
+		private var populationSize:uint = 400;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = .2;
-		private var crossOverProbability:Number = .9;
+		private var mutationProbability:Number = .13;
+		private var crossOverProbability:Number = .7;
 		
 		
 		private var convergenceTreshhold:Number = .000001;
@@ -172,16 +172,15 @@ package
 			//crear mutaciones
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			//show the best individual so far
-			if(this.numGenerations % 2 == 0)
+			if(this.numGenerations % 1 == 0)
 				this.showIndividual(mainPopulation.getElement(0));
 			mainPopulation.computePopulationFitness();
 			
 			var newPopulation:Population = new Population
-			newPopulation.addElement(mainPopulation.getElement(0));
 			
 			//reproduce the strings
 			while(newPopulation.size < this.populationSize){
-				var bs1:Individual = mainPopulation.chooseWithTournamentSelection()
+				var bs1:Individual = mainPopulation.chooseWithTournamentSelection();
 				var bs2:Individual = mainPopulation.chooseWithTournamentSelection();
 				reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 			}

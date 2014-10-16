@@ -17,7 +17,7 @@ package ga
 		
 		public var tournamentSelectionRange:Number = .23;
 		
-		public var tournamentSelectionProbability:Number = .58;
+		public var tournamentSelectionProbability:Number = .62;
 		
 		private var rankSelectionProbability:Number = .9;
 		

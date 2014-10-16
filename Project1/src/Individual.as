@@ -155,7 +155,7 @@ package
 			
 			var notInChild1:Array = new Array;
 			var notInChild2:Array = new Array;
-			//find the missine elements
+			//find the missing elements
 			var counter:uint = 0;
 			while(counter < length){
 				if(copiedInto1[bs.genome[counter]] != true)
@@ -210,25 +210,57 @@ package
 				}
 			}		
 			
-			var counterGenome:uint = (Math.random() < 0) ? Math.floor(Math.random() * this.length) : 0;
-			var counterBS:uint = (Math.random() < 0) ? Math.floor(Math.random() * this.length) : 0;
 			for(i = 0; i < this.length; i++){
 				if(child1[i] == undefined){
-					while(counterBS < length && copiedInto1[bs.genome[counterBS]] != undefined){
-						counterBS  = (counterBS+1) % length;
+					//if the element in bs at pos i is not yet in child 1 then add it
+					if(copiedInto1[bs.genome[i]] != true){
+						child1[i] = bs.genome[i];
+						copiedInto1[bs.genome[i]] = true;
 					}
-					child1[i] = bs.genome[counterBS];
-					counterBS  = (counterBS+1) % length;
 				}
 				
 				if(child2[i] == undefined){
-					while(counterGenome < length && copiedInto2[genome[counterGenome]] != undefined){
-						counterGenome  = (counterGenome+1) % length;
+					//if the element in bs at pos i is not yet in child 1 then add it
+					if(copiedInto2[bs.genome[i]] != true){
+						child2[i] = bs.genome[i];
+						copiedInto2[bs.genome[i]] = true;
 					}
-					child2[i] = genome[counterGenome];
-					counterGenome  = (counterGenome+1) % length;
 				}
 			}
+			
+			var notInChild1:Array = new Array;
+			var notInChild2:Array = new Array;
+			//find the missing elements
+			var counter:uint = 0;
+			while(counter < length){
+				if(copiedInto1[bs.genome[counter]] != true)
+					notInChild1.push(bs.genome[counter]);
+				if(copiedInto2[genome[counter]] != true)
+					notInChild2.push(bs.genome[counter]);
+				counter ++;
+			}
+			
+			for(i = 0; i < this.length; i++){
+				var randomIndex:uint;
+				var temp:Number;
+				if(child1[i] == undefined){
+					//add one elmeent at random from notInChild1
+					randomIndex = Math.floor(Math.random() * notInChild1.length);
+					temp = notInChild1[notInChild1.length-1];
+					notInChild1[notInChild1.length-1] = notInChild1[randomIndex];
+					notInChild1[randomIndex] = temp;
+					child1[i] = notInChild1.pop();
+				}
+				if(child2[i] == undefined){
+					//add one elmeent at random from notInChild1
+					randomIndex = Math.floor(Math.random() * notInChild2.length);
+					temp = notInChild1[notInChild2.length-1];
+					notInChild2[notInChild2.length-1] = notInChild2[randomIndex];
+					notInChild2[randomIndex] = temp;
+					child2[i] = notInChild2.pop();
+				}
+			}
+			
 			var bs1:Individual = new Individual(length, true, child1);
 			var bs2:Individual = new Individual(length, true, child2);
 			
