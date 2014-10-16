@@ -15,9 +15,10 @@ package ga
 			super();
 			//set up combo
 			var options:Array = new Array;
-			options.push({label:"Order Partially Mapped Crossover", value: 0});
-			options.push({label:"Position Partially Mapped Crossover", value: 1});
-			options.push({label:"Position Based Crossover", value: 2});
+			options.push({label:"Ordered Partially Mapped Crossover", value: 0});
+			options.push({label:"Parallel Partially Mapped Crossover", value: 1});
+			options.push({label:"Ordered Position Based Crossover", value: 2});
+			options.push({label:"Parallel Position Based Crossover", value: 3});
 			
 			var dp:DataProvider = new DataProvider(options);
 			this.crossOverFunction.dataProvider = dp;
@@ -50,13 +51,16 @@ package ga
 			var children:Array;
 			switch(this.crossOverFunction.selectedItem.value){
 				case 0: 
-					children = a.orderPartiallyMappedCrossover(b);
+					children = a.partiallyMappedCrossover(b, true);
 					break;
 				case 1: 
-					children = a.injectionPartiallyMappedCrossover(b);
+					children = a.partiallyMappedCrossover(b, false);
 					break;
 				case 2: 
-					children = a.positionBasedCrossOver(b);
+					children = a.randomInjectionBasedCrossOver(b, true);
+					break;
+				case 2: 
+					children = a.randomInjectionBasedCrossOver(b, false);
 					break;
 			}
 			
@@ -66,7 +70,5 @@ package ga
 			this.firstChild.text = c1.genome.join(",");
 			this.secondChild.text = c2.genome.join(",");
 		}
-		
-		
 	}
 }

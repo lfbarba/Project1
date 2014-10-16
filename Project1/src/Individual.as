@@ -67,54 +67,7 @@ package
 		}
 		
 		//returns an array with the children
-		public function orderPartiallyMappedCrossover(bs:Individual):Array {
-			//create an interval to exchange
-			var a:Number = Math.random();
-			var b:Number = Math.random();
-			var min:Number = Math.floor(Math.min(a,b)* this.length);
-			var max:Number = Math.floor(Math.max(a,b)* this.length);
-			//copy
-			var child1:Array = new Array;
-			var child2:Array = new Array;
-			
-			//create hash maps for the existing coppied values
-			var copiedInto1:Array = new Array;
-			var copiedInto2:Array = new Array;
-			//
-			for(var i:uint = min; i <= max; i++){
-				child1[i] = genome[i];
-				copiedInto1[genome[i]] = true;
-				child2[i] = bs.genome[i];
-				copiedInto2[bs.genome[i]] = true;
-			}
-			
-			var counterGenome:uint = (Math.random() < .0) ? Math.floor(Math.random() * this.length) : 0;
-			var counterBS:uint = (Math.random() < .0) ? Math.floor(Math.random() * this.length) : 0;
-			for(i = 0; i < this.length; i++){
-				if(child1[i] == undefined){
-					while(counterBS < length && copiedInto1[bs.genome[counterBS]] != undefined){
-						counterBS  = (counterBS+1) % length;
-					}
-					child1[i] = bs.genome[counterBS];
-					counterBS  = (counterBS+1) % length;
-				}
-				
-				if(child2[i] == undefined){
-					while(counterGenome < length && copiedInto2[genome[counterGenome]] != undefined){
-						counterGenome = (counterGenome+1) % length;
-					}
-					child2[i] = genome[counterGenome];
-					counterGenome = (counterGenome+1) % length;
-				}
-			}
-			var bs1:Individual = new Individual(length, true, child1);
-			var bs2:Individual = new Individual(length, true, child2);
-			
-			return new Array(bs1, bs2);
-		}
-		
-		//returns an array with the children
-		public function injectionPartiallyMappedCrossover(bs:Individual):Array {
+		public function partiallyMappedCrossover(bs:Individual, orderedOrParallel:Boolean):Array {
 			//create an interval to exchange
 			var a:Number = Math.random();
 			var b:Number = Math.random();
@@ -135,64 +88,14 @@ package
 				copiedInto2[bs.genome[i]] = true;
 			}
 			
-			for(i = 0; i < this.length; i++){
-				if(child1[i] == undefined){
-					//if the element in bs at pos i is not yet in child 1 then add it
-					if(copiedInto1[bs.genome[i]] != true){
-						child1[i] = bs.genome[i];
-						copiedInto1[bs.genome[i]] = true;
-					}
-				}
-				
-				if(child2[i] == undefined){
-					//if the element in bs at pos i is not yet in child 1 then add it
-					if(copiedInto2[bs.genome[i]] != true){
-						child2[i] = bs.genome[i];
-						copiedInto2[bs.genome[i]] = true;
-					}
-				}
+			if(orderedOrParallel){
+				return this.orderedFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
+			}else{
+				return this.paralellFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
 			}
-			
-			var notInChild1:Array = new Array;
-			var notInChild2:Array = new Array;
-			//find the missing elements
-			var counter:uint = 0;
-			while(counter < length){
-				if(copiedInto1[bs.genome[counter]] != true)
-					notInChild1.push(bs.genome[counter]);
-				if(copiedInto2[genome[counter]] != true)
-					notInChild2.push(bs.genome[counter]);
-				counter ++;
-			}
-			
-			for(i = 0; i < this.length; i++){
-				var randomIndex:uint;
-				var temp:Number;
-				if(child1[i] == undefined){
-					//add one elmeent at random from notInChild1
-					randomIndex = Math.floor(Math.random() * notInChild1.length);
-					temp = notInChild1[notInChild1.length-1];
-					notInChild1[notInChild1.length-1] = notInChild1[randomIndex];
-					notInChild1[randomIndex] = temp;
-					child1[i] = notInChild1.pop();
-				}
-				if(child2[i] == undefined){
-					//add one elmeent at random from notInChild1
-					randomIndex = Math.floor(Math.random() * notInChild2.length);
-					temp = notInChild1[notInChild2.length-1];
-					notInChild2[notInChild2.length-1] = notInChild2[randomIndex];
-					notInChild2[randomIndex] = temp;
-					child2[i] = notInChild2.pop();
-				}
-			}
-			
-			var bs1:Individual = new Individual(length, true, child1);
-			var bs2:Individual = new Individual(length, true, child2);
-			
-			return new Array(bs1, bs2);
 		}
 		
-		public function positionBasedCrossOver(bs:Individual):Array {
+		public function randomInjectionBasedCrossOver(bs:Individual, orderedOrParallel:Boolean = true):Array {
 			var child1:Array = new Array;
 			var child2:Array = new Array;
 			//create hash maps for the existing coppied values
@@ -209,8 +112,44 @@ package
 					copiedInto2[bs.genome[i]] = true;
 				}
 			}		
+			if(orderedOrParallel){
+				return this.orderedFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
+			}else{
+				return this.paralellFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
+			}
+		}
+		
+		
+		private function orderedFillingEmptyEntries(bs:Individual, child1:Array, 
+												  child2:Array, copiedInto1:Array, copiedInto2:Array):Array {
+			var counterGenome:uint = 0;
+			var counterBS:uint = 0;
+			for(var i:uint = 0; i < this.length; i++){
+				if(child1[i] == undefined){
+					while(counterBS < length && copiedInto1[bs.genome[counterBS]] != undefined){
+						counterBS ++;
+					}
+					child1[i] = bs.genome[counterBS];
+					counterBS  ++;
+				}
+				
+				if(child2[i] == undefined){
+					while(counterGenome < length && copiedInto2[genome[counterGenome]] != undefined){
+						counterGenome  ++;
+					}
+					child2[i] = genome[counterGenome];
+					counterGenome  ++;
+				}
+			}
+			var bs1:Individual = new Individual(length, true, child1);
+			var bs2:Individual = new Individual(length, true, child2);
 			
-			for(i = 0; i < this.length; i++){
+			return new Array(bs1, bs2);
+		}
+		
+		private function paralellFillingEmptyEntries(bs:Individual, child1:Array, 
+													 child2:Array, copiedInto1:Array, copiedInto2:Array):Array {
+			for(var i:uint = 0; i < this.length; i++){
 				if(child1[i] == undefined){
 					//if the element in bs at pos i is not yet in child 1 then add it
 					if(copiedInto1[bs.genome[i]] != true){

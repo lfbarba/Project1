@@ -21,7 +21,7 @@ package
 		private var populationSize:uint = 400;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = .13;
+		private var mutationProbability:Number = .18;
 		private var crossOverProbability:Number = .7;
 		
 		
@@ -205,12 +205,14 @@ package
 				var children:Array;
 				//select crossover type randomly
 				var sample:Number = Math.random();
-				if(sample < .6){
-					children = bs1.positionBasedCrossOver(bs2);
+				if(sample < .3){
+					children = bs1.randomInjectionBasedCrossOver(bs2, true);
+				}else if(sample < .6){
+					children = bs1.randomInjectionBasedCrossOver(bs2, false);
 				}else if(sample < .8){
-					children = bs1.orderPartiallyMappedCrossover(bs2);
+					children = bs1.partiallyMappedCrossover(bs2, true);
 				}else{
-					children = bs1.injectionPartiallyMappedCrossover(bs2);
+					children = bs1.partiallyMappedCrossover(bs2, false);
 				}
 				//
 				var c0:Individual = children[0] as Individual;
