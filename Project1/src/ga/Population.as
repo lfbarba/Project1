@@ -8,12 +8,18 @@ package ga
 	{
 		private var populationAverage:Number;
 		private var populationMaximum:Number = 0;
-		private var populationMinimum:Number = 1;
+		private var populationMinimum:Number = 1000000;
 		private var populationSum:Number = 0;
 		
 		private var fitnessProbabilitySpace:Array;
 		
 		private var population:Array;
+		
+		public var tournamentSelectionRange:Number = .23;
+		
+		public var tournamentSelectionProbability:Number = .58;
+		
+		private var rankSelectionProbability:Number = .9;
 		
 		private var fitnessComputed:Boolean = false;
 		
@@ -74,14 +80,30 @@ package ga
 			this.population.push(bs);
 		}
 		
-		public function chooseAnIndividualAtRandom():Individual {
-			return this.population[Math.floor(Math.random() * this.size)] as Individual;
+		/*public function chooseWithTankSelection():Individual {
+			if(Math.random() < Math.pow(rankSelectionProbability, Math.sqrt(i))){
+				
+			}
+		}*/
+		
+		public function chooseWithTournamentSelection():Individual {
+			var range:uint = Math.floor(tournamentSelectionRange * this.size);
+			var index:uint;
+			//flip a biased coin to select at random from the fittest or from the rest
+			if(Math.random() < tournamentSelectionProbability){
+				//select from the top
+				index = Math.floor(Math.random() * range);
+			}else{
+				index = range + Math.floor(Math.random() * (this.size - range));
+			}
+			return this.population[index] as Individual;
 		}
 		
-		public function chooseAnIndividualAtRandomWithFitness():Individual {
+		public function chooseWithRouletteWheelSelection():Individual {
 			if(fitnessComputed == false)
 				this.computePopulationFitness();
-			var pointer:Number = Math.random() * this.populationSum;
+			//
+			var pointer:Number = Math.random() * this.populationSquareSum;
 			//binary search fitnessProbabilitySpace to find the bs 
 			var i:uint = 0;
 			var j:uint = fitnessProbabilitySpace.length - 1;
@@ -103,32 +125,38 @@ package ga
 			return fitnessProbabilitySpace[i][1] as Individual;
 		}
 		
+		private var populationSquareSum:Number = 0;
+		
 		public function computePopulationFitness():void {
 			fitnessComputed = true;
 			
-			fitnessProbabilitySpace = new Array;
 			var sum:Number = 0;
 			var max:Number = 0;
 			var min:Number = 10000000000000000;
+			var squareSum:Number = 0;
+			
+			fitnessProbabilitySpace = new Array;
 			for(var i:uint = 0; i< population.length; i++){
 				var bs:Individual = population[i] as Individual;
 				sum += bs.fitness;
-				fitnessProbabilitySpace.push(new Array(sum, bs));
+				squareSum += Math.pow(bs.fitness, 3.5);
 				max = Math.max(bs.fitness, max);
 				min = Math.min(bs.fitness, min);
+				fitnessProbabilitySpace.push(new Array(squareSum, bs));
 			}
 			this.populationAverage =  sum/population.length;
 			this.populationMaximum = max;
 			this.populationMinimum = min;
-			this.populationSum = sum;
+			this.populationSum = sum;		
+			this.populationSquareSum = squareSum;		
 		}
 		
 		public function printStatistics():void {
 			this.sortByFitness();
 			trace("maximum Element", this.population[0]);
-			trace("maximum = ", this.maximum);
-			trace("average = ", this.average);
-			trace("minimum = ", this.minimum);
+			trace("minimum = ", 1/this.maximum);
+			trace("average = ", 1/this.average);
+			trace("maximum = ", 1/this.minimum);
 		}
 	}
 }

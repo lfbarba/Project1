@@ -9,6 +9,7 @@ package
 	import flash.geom.Point;
 	import flash.utils.Timer;
 	
+	import ga.CrossOverTester;
 	import ga.PointSet;
 	import ga.Population;
 	import ga.TspPoint;
@@ -17,19 +18,14 @@ package
 	{
 		private var mainPopulation:Population;
 		
-		private var populationSize:uint = 500;
+		private var populationSize:uint = 300;
 		private var genomeLength:uint;
 		
 		private var mutationProbability:Number = .2;
-		private var crossOverProbability:Number = .8;
+		private var crossOverProbability:Number = .9;
 		
 		
-		private var tournamentSelectionRange:uint = 50;
-		private var tournamentSelectionProbability:Number = .4;
-		
-		private var rankSelectionProbability:Number = .993;
-		
-		private var convergenceTreshhold:Number = 10;
+		private var convergenceTreshhold:Number = .000001;
 		
 		private var maxNumGenerations:uint = 1000;
 		private var numGenerations:uint = 0;
@@ -45,6 +41,9 @@ package
 		
 		private var startButton:Button;
 		private var stopButton:Button;
+		private var openTester:Button;
+		
+		private var crossOverTester:CrossOverTester;
 		
 		public function SimpleTSP()
 		{
@@ -54,6 +53,7 @@ package
 			
 			var ps:PointSet = new PointSet;
 			ps.readFromFile("berlin52.txt");
+			//ps.createPointInCricle();
 			this.setPointSet(ps);
 			
 			t = new Timer(1, 0);
@@ -67,13 +67,28 @@ package
 			stopButton = new Button;
 			startButton.x = startButton. y  = stopButton.y = 20;
 			stopButton.x = 140;
-			startButton.label = "Iniciar GA";
+			startButton.label = "Start GA";
 			stopButton.label = "Stop GA";
 			this.addChild(startButton);
 			this.addChild(stopButton);
 			startButton.addEventListener(MouseEvent.CLICK, this.startGeneticAlgorithm);
 			stopButton.addEventListener(MouseEvent.CLICK, this.stopProcess);
 			//
+			this.openTester = new Button;
+			openTester.label = "CrossoverTester";
+			openTester.x = 20;
+			openTester.y = this.stage.stageHeight - 40;
+			this.addChild(openTester);
+			openTester.addEventListener(MouseEvent.CLICK, openCrossoverTester);
+			//
+			crossOverTester = new CrossOverTester;
+			crossOverTester.x = this.stage.stageWidth/2;
+			crossOverTester.y = this.stage.stageHeight/2;
+			this.addChild(crossOverTester);
+		}
+		
+		private function openCrossoverTester(e:MouseEvent):void {
+			this.crossOverTester.testTwoRandomIndividuals(16);
 		}
 		
 		private function fitIntoScreen(e:Event = null){
@@ -82,7 +97,8 @@ package
 			var ratio:Number = Math.max(w/this.stage.stageWidth, h / this.stage.stageHeight);
 			if(ratio > 1){
 				visualLayer.scaleX = 1/ratio;
-				visualLayer.scaleY = 1/ratio;
+				visualLayer.scaleY = -1/ratio;
+				visualLayer.y = this.stage.stageHeight;
 			}
 		}
 		
@@ -97,6 +113,7 @@ package
 		}
 		
 		private function startGeneticAlgorithm(e:MouseEvent):void {
+			numGenerations = 0;
 			genomeLength = CURRENT_POINTSET.points.length;
 			createPopulation();
 			//this.printGeneration();
@@ -119,7 +136,7 @@ package
 				//
 				numGenerations++;
 				if(numGenerations % 50 == 0)
-					trace("Running generation", numGenerations);
+					trace("Running generation", numGenerations,"Maximum", 1/mainPopulation.maximum);
 			}
 		}
 		
@@ -153,97 +170,76 @@ package
 		
 		private function runOneGeneration():void {
 			//crear mutaciones
-			this.createMutations();
-			mainPopulation.sortByFitness();
+			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			//show the best individual so far
-			this.showIndividual(mainPopulation.getElement(0));
+			if(this.numGenerations % 2 == 0)
+				this.showIndividual(mainPopulation.getElement(0));
 			mainPopulation.computePopulationFitness();
 			
-			var selectedPopulation:Population = this.applyRankSelection();
-			//empty population
-			this.mainPopulation = new Population;
+			var newPopulation:Population = new Population
+			newPopulation.addElement(mainPopulation.getElement(0));
 			
 			//reproduce the strings
-			while(selectedPopulation.size > 0 && mainPopulation.size < this.populationSize){
-				var bs1:Individual = selectedPopulation.chooseAnIndividualAtRandomWithFitness();
-				var bs2:Individual = selectedPopulation.chooseAnIndividualAtRandomWithFitness();
-				reproduceAndAddToMainPopulation(bs1, bs2);
+			while(newPopulation.size < this.populationSize){
+				var bs1:Individual = mainPopulation.chooseWithTournamentSelection()
+				var bs2:Individual = mainPopulation.chooseWithTournamentSelection();
+				reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 			}
+			
+			mainPopulation = newPopulation;
+			this.createMutations();
 		}
 		
-		
-		private function applyNaiveSelection():Population {
-			var percentageOfPopulation:Number = .5;
-			//choose the individuals to reproduce
+		private function applyNoSelection():Population {
 			var selectedPopulation:Population = new Population;
-			mainPopulation.sortByFitness();
-			while(selectedPopulation.size < mainPopulation.size * percentageOfPopulation){
+			while(mainPopulation.size > 0){
 				selectedPopulation.addElement(mainPopulation.removeFirst());
 			}
-			selectedPopulation.computePopulationFitness();
 			return selectedPopulation;
 		}
 		
-		private function applyTournamentSelection():Population {
-			var percentageOfPopulation:Number = .40;
-			//choose the individuals to reproduce
-			var selectedPopulation:Population = new Population;
-			while(selectedPopulation.size < mainPopulation.size * percentageOfPopulation){
-				var index:uint;
-				//flip a biased coin to select at random from the fittest or from the rest
-				if(Math.random() < this.tournamentSelectionProbability){
-					//select from the top
-					index = Math.floor(Math.random() * this.tournamentSelectionRange);
-				}else{
-					index = this.tournamentSelectionRange + Math.floor(Math.random() * (mainPopulation.size - this.tournamentSelectionRange));
-				}
-				
-				selectedPopulation.addElement(this.mainPopulation.getElement(index));
-			}
-			selectedPopulation.computePopulationFitness();
-			return selectedPopulation;
-		}
+	
 		
-		
-		private function applyRankSelection():Population {
-			//choose the individuals to reproduce
-			var selectedPopulation:Population = new Population;
-			for(var i:uint = 0; i< mainPopulation.size; i++){
-				if(Math.random() < Math.pow(rankSelectionProbability, i)){
-					selectedPopulation.addElement(this.mainPopulation.getElement(i));
-				}
-			}
-			//trace(Math.round(100*selectedPopulation.size/ this.populationSize)+"%");
-			selectedPopulation.computePopulationFitness();
-			return selectedPopulation;
-		}
-		
-		private function reproduceAndAddToMainPopulation(bs1:Individual, bs2:Individual):void{
+		private function reproduceAndAddToPopulation(bs1:Individual, bs2:Individual, population:Population):void{
 			//cross over or reinstert them into pupulation
 			if(Math.random() < this.crossOverProbability){
 				var children:Array;
 				//select crossover type randomly
-				if(Math.random() < .5){
+				var sample:Number = Math.random();
+				if(sample < .6){
+					children = bs1.positionBasedCrossOver(bs2);
+				}else if(sample < .8){
 					children = bs1.orderPartiallyMappedCrossover(bs2);
 				}else{
-					children = bs1.positionBasedCrossOver(bs2);
+					children = bs1.injectionPartiallyMappedCrossover(bs2);
 				}
 				//
 				var c0:Individual = children[0] as Individual;
 				var c1:Individual = children[1] as Individual;
-				mainPopulation.addElement(c0);
-				mainPopulation.addElement(c1);
+				population.addElement(c0);
+				population.addElement(c1);
 			}else{
-				mainPopulation.addElement(bs1);
-				mainPopulation.addElement(bs2);
+				population.addElement(bs1);
+				population.addElement(bs2);
 			}
 		}
 		
 		private function createMutations():void {
 			for(var i:uint = 0; i< mainPopulation.size; i++){
 				var bs:Individual = mainPopulation.getElement(i);
-				if(Math.random() < this.mutationProbability){
-					bs.mutate();
+				this.mutate(bs);
+			}
+		}
+		
+		private function mutate(bs:Individual):void {
+			if(Math.random() < this.mutationProbability){
+				var rand:Number = Math.random();
+				if(rand < .33){
+					bs.swapMutation();
+				}else if (rand < .66){
+					bs.reverseMutation();
+				}else{
+					bs.insertMutation();
 				}
 			}
 		}

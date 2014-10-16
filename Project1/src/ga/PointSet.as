@@ -19,7 +19,16 @@ package ga
 		}
 		
 		
-		public function readFromFile(url:String) {
+		public function createPointInCricle():void {
+			var n:uint = 70;
+			for(var i:uint = 0; i < n; i++){
+				var alpha:Number = i* 2*Math.PI / n;
+				var p:TspPoint = new TspPoint(600 + 500*Math.cos(alpha), 500 + 500*Math.sin(alpha));
+				this.addPoint(p);
+			}
+		}
+		
+		public function readFromFile(url:String):void {
 			var myTextLoader:URLLoader = new URLLoader();
 			myTextLoader.addEventListener(Event.COMPLETE, onFileLoaded);
 			
