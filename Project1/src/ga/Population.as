@@ -15,15 +15,15 @@ package ga
 		
 		private var population:Array;
 		
-		public var tournamentSelectionRange:Number = .25;
+		public var tournamentSelectionRange:Number = .3;
 		
-		public var tournamentSelectionProbability:Number = .74;
+		public var tournamentSelectionProbability:Number = .5;
 		
 		private var rankSelectionProbability:Number = .9;
 		
 		private var fitnessComputed:Boolean = false;
 		
-		public static var POPULATION_BAD_TRESHHOLD:uint = 30000;
+		public static var POPULATION_BAD_TRESHHOLD:uint = 32000;
 		
 		public function Population()
 		{

@@ -21,7 +21,7 @@ package
 		private var populationSize:uint = 300;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = .2;
+		private var mutationProbability:Number = 1;
 		private var crossOverProbability:Number = .8;
 		
 		
@@ -142,7 +142,8 @@ package
 				//
 				numGenerations++;
 				if(numGenerations % 50 == 0)
-					trace("Running generation", numGenerations,"Maximum", Population.POPULATION_BAD_TRESHHOLD -mainPopulation.maximum);
+					trace("Running generation", numGenerations,"Best", Math.floor(Population.POPULATION_BAD_TRESHHOLD - this.bestFitness),
+					"Current" , Math.round(Population.POPULATION_BAD_TRESHHOLD -mainPopulation.maximum));
 			}
 		}
 		
@@ -171,13 +172,9 @@ package
 			}
 			progressExampleLayer = new Sprite;
 			visualLayer.addChild(progressExampleLayer);
-			progressExampleLayer.addChild(p.drawIndividual());
-		}
-		
-		private function showBest():void {
-			if(this.bestIndividual != null){
-				progressExampleLayer.addChild(bestIndividual.drawIndividual(0x0000FF, 5));
-			}
+			if(bestIndividual != null)
+				progressExampleLayer.addChild(bestIndividual.drawIndividual(0x0000FF, 6));
+			progressExampleLayer.addChild(p.drawIndividual());	
 		}
 		
 		private function runOneGeneration():void {
@@ -187,10 +184,9 @@ package
 			var best:Individual = mainPopulation.getElement(0);
 			if(best.fitness  >  bestFitness){
 				bestFitness = best.fitness;
-				bestIndividual = best;
+				bestIndividual = new Individual(best.length, true, best.genome);
 			}
-			this.showIndividual(best);
-			//this.showBest();
+			this.showIndividual(mainPopulation.getElement(0));
 			
 			mainPopulation.computePopulationFitness();
 			
@@ -198,8 +194,15 @@ package
 			
 			//reproduce the strings
 			while(newPopulation.size < this.populationSize){
-				var bs1:Individual = mainPopulation.chooseWithRouletteWheelSelection();
-				var bs2:Individual = mainPopulation.chooseWithRouletteWheelSelection();
+				var bs1:Individual;
+				var bs2:Individual;
+				if(Math.random() < .2){
+					bs1 = mainPopulation.chooseWithTournamentSelection();
+					bs2 = mainPopulation.chooseWithTournamentSelection();
+				}else{
+					bs1 = mainPopulation.chooseWithRouletteWheelSelection();
+					bs2 = mainPopulation.chooseWithRouletteWheelSelection();
+				}
 				reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 			}
 			
