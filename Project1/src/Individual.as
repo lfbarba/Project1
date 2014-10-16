@@ -4,6 +4,7 @@ package
 	
 	import flash.display.Sprite;
 	
+	import ga.Population;
 	import ga.TspPoint;
 
 	public class Individual
@@ -34,13 +35,12 @@ package
 				//summ the distance between current and next
 				totalLength += Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
 			}
-			this.fitness =  100000-totalLength;
+			this.fitness =  Population.POPULATION_BAD_TRESHHOLD-totalLength;
 		}
 		
 		public function drawIndividual(color:Number = 0, thickness:Number = 1):Sprite {
 			var draw:Sprite = new Sprite;
 			draw.graphics.lineStyle(thickness, color);
-			
 			var first:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[0]] as TspPoint;
 			draw.graphics.moveTo(first.x, first.y);
 			for(var i:uint = 1; i<= this.length; i++){
@@ -278,7 +278,7 @@ package
 		}
 		
 		public function toString():String {
-			return this.genome.join(",")+"\nFitness="+(100000 -this.fitness);
+			return this.genome.join(",")+"\nFitness="+(Population.POPULATION_BAD_TRESHHOLD -this.fitness);
 		}
 	}
 }

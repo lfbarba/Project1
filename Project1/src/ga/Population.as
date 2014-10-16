@@ -15,13 +15,15 @@ package ga
 		
 		private var population:Array;
 		
-		public var tournamentSelectionRange:Number = .22;
+		public var tournamentSelectionRange:Number = .25;
 		
 		public var tournamentSelectionProbability:Number = .74;
 		
 		private var rankSelectionProbability:Number = .9;
 		
 		private var fitnessComputed:Boolean = false;
+		
+		public static var POPULATION_BAD_TRESHHOLD:uint = 30000;
 		
 		public function Population()
 		{
@@ -132,7 +134,7 @@ package ga
 			
 			var sum:Number = 0;
 			var max:Number = 0;
-			var min:Number = 10000000000000000;
+			var min:Number = 1000000000000;
 			var squareSum:Number = 0;
 			
 			fitnessProbabilitySpace = new Array;
@@ -153,9 +155,9 @@ package ga
 		
 		public function printStatistics():void {
 			this.sortByFitness(Array.NUMERIC);
-			trace("minimum = ", 1/this.maximum);
-			trace("average = ", 1/this.average);
-			trace("maximum = ", 1/this.minimum);
+			trace("minimum = ", POPULATION_BAD_TRESHHOLD - this.maximum);
+			trace("average = ", POPULATION_BAD_TRESHHOLD - this.average);
+			trace("maximum = ", POPULATION_BAD_TRESHHOLD - this.minimum);
 		}
 	}
 }

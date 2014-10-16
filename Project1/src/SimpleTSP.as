@@ -18,10 +18,10 @@ package
 	{
 		private var mainPopulation:Population;
 		
-		private var populationSize:uint = 400;
+		private var populationSize:uint = 300;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = .1;
+		private var mutationProbability:Number = .2;
 		private var crossOverProbability:Number = .8;
 		
 		
@@ -40,7 +40,7 @@ package
 		private var visualLayer:Sprite;
 		
 		private var bestIndividual:Individual;
-		private var bestFitness:Number = 0;
+		private var bestFitness:Number = -1* Population.POPULATION_BAD_TRESHHOLD;
 		
 		private var startButton:Button;
 		private var stopButton:Button;
@@ -127,8 +127,8 @@ package
 			t.stop();
 			trace("number of generations = ", numGenerations);
 			mainPopulation.printStatistics();
-			trace("Best fitness", 100000 - this.bestFitness);
-			this.bestFitness = 0;
+			trace("Best fitness", Population.POPULATION_BAD_TRESHHOLD - this.bestFitness);
+			this.bestFitness = -1*Population.POPULATION_BAD_TRESHHOLD;
 			this.bestIndividual = null;
 		}
 		
@@ -142,7 +142,7 @@ package
 				//
 				numGenerations++;
 				if(numGenerations % 50 == 0)
-					trace("Running generation", numGenerations,"Maximum", 100000 -mainPopulation.maximum);
+					trace("Running generation", numGenerations,"Maximum", Population.POPULATION_BAD_TRESHHOLD -mainPopulation.maximum);
 			}
 		}
 		
@@ -171,31 +171,35 @@ package
 			}
 			progressExampleLayer = new Sprite;
 			visualLayer.addChild(progressExampleLayer);
-			if(bestIndividual != null)
-				progressExampleLayer.addChild(this.bestIndividual.drawIndividual(0x0000FF, 6));
 			progressExampleLayer.addChild(p.drawIndividual());
-			
+		}
+		
+		private function showBest():void {
+			if(this.bestIndividual != null){
+				progressExampleLayer.addChild(bestIndividual.drawIndividual(0x0000FF, 5));
+			}
 		}
 		
 		private function runOneGeneration():void {
 			//crear mutaciones
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			//show the best individual so far
-			if(this.numGenerations % 1 == 0)
-				this.showIndividual(mainPopulation.getElement(0));
-			
-			if(mainPopulation.getElement(0).fitness  >  bestFitness){
-				bestFitness = mainPopulation.getElement(0).fitness;
-				this.bestIndividual = mainPopulation.getElement(0);
+			var best:Individual = mainPopulation.getElement(0);
+			if(best.fitness  >  bestFitness){
+				bestFitness = best.fitness;
+				bestIndividual = best;
 			}
+			this.showIndividual(best);
+			//this.showBest();
+			
 			mainPopulation.computePopulationFitness();
 			
 			var newPopulation:Population = new Population
 			
 			//reproduce the strings
 			while(newPopulation.size < this.populationSize){
-				var bs1:Individual = mainPopulation.chooseWithTournamentSelection();
-				var bs2:Individual = mainPopulation.chooseWithTournamentSelection();
+				var bs1:Individual = mainPopulation.chooseWithRouletteWheelSelection();
+				var bs2:Individual = mainPopulation.chooseWithRouletteWheelSelection();
 				reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 			}
 			
