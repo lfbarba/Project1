@@ -152,12 +152,5 @@ package ga
 			this.populationSum = sum;		
 			this.populationSquareSum = squareSum;		
 		}
-		
-		public function printStatistics():void {
-			this.sortByFitness(Array.NUMERIC);
-			trace("minimum = ", POPULATION_BAD_TRESHHOLD - this.maximum);
-			trace("average = ", POPULATION_BAD_TRESHHOLD - this.average);
-			trace("maximum = ", POPULATION_BAD_TRESHHOLD - this.minimum);
-		}
 	}
 }

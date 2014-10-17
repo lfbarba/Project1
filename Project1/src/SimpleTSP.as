@@ -10,19 +10,23 @@ package
 	import flash.utils.Timer;
 	
 	import ga.CrossOverTester;
+	import ga.Parameters;
+	import ga.ParametersChangeEvent;
 	import ga.PointSet;
 	import ga.Population;
 	import ga.TspPoint;
 	
 	public class SimpleTSP extends Sprite
 	{
+		private var parameters:Parameters;
+		
 		private var mainPopulation:Population;
 		
-		private var populationSize:uint = 300;
+		private var populationSize:uint;
 		private var genomeLength:uint;
 		
-		private var mutationProbability:Number = 1;
-		private var crossOverProbability:Number = .8;
+		private var mutationProbability:Number;
+		private var crossOverProbability:Number;
 		
 		
 		private var convergenceTreshhold:Number = .000001;
@@ -88,6 +92,18 @@ package
 			crossOverTester.x = this.stage.stageWidth/2;
 			crossOverTester.y = this.stage.stageHeight/2;
 			this.addChild(crossOverTester);
+			
+			parameters = new Parameters;
+			parameters.x = this.stage.stageWidth;
+			parameters.y = 0;
+			stage.addEventListener(ParametersChangeEvent.PARAMETERS_CHANGE, parametersChangeHandler);
+			this.addChild(parameters);
+		}
+		
+		private function parametersChangeHandler(e:ParametersChangeEvent):void {
+			this.populationSize = e.parameters.getPopulationSize();
+			this.crossOverProbability = e.parameters.getCrossoverProbability();
+			this.mutationProbability = e.parameters.getMutationProbability();
 		}
 		
 		private function openCrossoverTester(e:MouseEvent):void {
@@ -125,19 +141,15 @@ package
 
 		private function stopProcess(e:MouseEvent = null):void {
 			t.stop();
-			trace("number of generations = ", numGenerations);
-			mainPopulation.printStatistics();
-			trace("Best fitness", Population.POPULATION_BAD_TRESHHOLD - this.bestFitness);
 			this.bestFitness = -1*Population.POPULATION_BAD_TRESHHOLD;
 			this.bestIndividual = null;
 		}
-		
-		
 		
 		private function geneticAlgorithmMain(e:TimerEvent):void {
 			if(this.populationHasConverged()){
 				stopProcess();
 			}else{
+				this.parameters.updateNumGenerations(numGenerations);
 				runOneGeneration();
 				//
 				numGenerations++;
@@ -177,9 +189,19 @@ package
 			progressExampleLayer.addChild(p.drawIndividual());	
 		}
 		
+		private function reportStatistics():void {
+			var max:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.maximum;
+			var min:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.minimum;
+			var avg:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.average;
+			var best:Number = Population.POPULATION_BAD_TRESHHOLD - this.bestFitness;
+			var current:Number = Population.POPULATION_BAD_TRESHHOLD - mainPopulation.getElement(0).fitness;
+			this.parameters.updateStatistics(Math.round(max), Math.round(min), Math.round(avg), Math.round(best), Math.round(current));
+		}
+		
 		private function runOneGeneration():void {
 			//crear mutaciones
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
+			reportStatistics();
 			//show the best individual so far
 			var best:Individual = mainPopulation.getElement(0);
 			if(best.fitness  >  bestFitness){
