@@ -32,10 +32,12 @@ package
 		private var convergenceTreshhold:Number = .000001;
 		
 		private var maxNumGenerations:uint = 1000;
-		private var numGenerations:uint = 0;
+		public static var numGenerations:uint = 0;
 		
 		
 		private var t:Timer;
+		
+		private var elitismNumber:uint = 10;
 		
 		public static var CURRENT_POINTSET:PointSet;
 		
@@ -44,13 +46,17 @@ package
 		private var visualLayer:Sprite;
 		
 		private var bestIndividual:Individual;
-		private var bestFitness:Number = -1* Population.POPULATION_BAD_TRESHHOLD;
+		private var bestFitness:Number =  - 100000;
 		
 		private var startButton:Button;
 		private var stopButton:Button;
 		private var openTester:Button;
 		
+		private var selectionFunction:Function;
+		
 		private var crossOverTester:CrossOverTester;
+		
+		private var selectionType:uint;
 		
 		public function SimpleTSP()
 		{
@@ -63,7 +69,7 @@ package
 			//ps.createPointInCricle();
 			this.setPointSet(ps);
 			
-			t = new Timer(1, 0);
+			t = new Timer(0, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
 			
 			this.stage.doubleClickEnabled = true;
@@ -96,7 +102,7 @@ package
 			parameters = new Parameters;
 			parameters.x = this.stage.stageWidth;
 			parameters.y = 0;
-			stage.addEventListener(ParametersChangeEvent.PARAMETERS_CHANGE, parametersChangeHandler);
+			Parameters.inst.addEventListener(ParametersChangeEvent.PARAMETERS_CHANGE, parametersChangeHandler);
 			this.addChild(parameters);
 		}
 		
@@ -104,6 +110,7 @@ package
 			this.populationSize = e.parameters.getPopulationSize();
 			this.crossOverProbability = e.parameters.getCrossoverProbability();
 			this.mutationProbability = e.parameters.getMutationProbability();
+			this.selectionType = e.parameters.getSelectionType();
 		}
 		
 		private function openCrossoverTester(e:MouseEvent):void {
@@ -141,11 +148,12 @@ package
 
 		private function stopProcess(e:MouseEvent = null):void {
 			t.stop();
-			this.bestFitness = -1*Population.POPULATION_BAD_TRESHHOLD;
+			this.bestFitness = -100000;
 			this.bestIndividual = null;
 		}
 		
 		private function geneticAlgorithmMain(e:TimerEvent):void {
+			t.stop();
 			if(this.populationHasConverged()){
 				stopProcess();
 			}else{
@@ -153,10 +161,8 @@ package
 				runOneGeneration();
 				//
 				numGenerations++;
-				if(numGenerations % 50 == 0)
-					trace("Running generation", numGenerations,"Best", Math.floor(Population.POPULATION_BAD_TRESHHOLD - this.bestFitness),
-					"Current" , Math.round(Population.POPULATION_BAD_TRESHHOLD -mainPopulation.maximum));
 			}
+			t.start();
 		}
 		
 		
@@ -190,17 +196,20 @@ package
 		}
 		
 		private function reportStatistics():void {
-			var max:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.maximum;
-			var min:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.minimum;
-			var avg:Number = Population.POPULATION_BAD_TRESHHOLD - this.mainPopulation.average;
-			var best:Number = Population.POPULATION_BAD_TRESHHOLD - this.bestFitness;
-			var current:Number = Population.POPULATION_BAD_TRESHHOLD - mainPopulation.getElement(0).fitness;
+			var max:Number = -1*this.mainPopulation.maximum;
+			var min:Number = -1* this.mainPopulation.minimum;
+			var avg:Number = -1*this.mainPopulation.average;
+			var best:Number = -1* this.bestFitness;
+			var current:Number = -1* mainPopulation.getElement(0).fitness;
 			this.parameters.updateStatistics(Math.round(max), Math.round(min), Math.round(avg), Math.round(best), Math.round(current));
 		}
+		
+
 		
 		private function runOneGeneration():void {
 			//crear mutaciones
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
+			mainPopulation.computePopulationFitness();
 			reportStatistics();
 			//show the best individual so far
 			var best:Individual = mainPopulation.getElement(0);
@@ -210,80 +219,98 @@ package
 			}
 			this.showIndividual(mainPopulation.getElement(0));
 			
-			mainPopulation.computePopulationFitness();
+			var newPopulation:Population = new Population(parameters);
 			
-			var newPopulation:Population = new Population
+			for(var j:uint = 0; j < elitismNumber; j++){
+				newPopulation.addElement(mainPopulation.getElement(j));
+			}
 			
 			//reproduce the strings
 			while(newPopulation.size < this.populationSize){
 				var bs1:Individual;
 				var bs2:Individual;
-				if(Math.random() < .2){
-					bs1 = mainPopulation.chooseWithTournamentSelection();
-					bs2 = mainPopulation.chooseWithTournamentSelection();
+				if(Math.random() < this.crossOverProbability){
+					bs1 = selectIndividual();
+					bs2 = selectIndividual();
+					reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 				}else{
-					bs1 = mainPopulation.chooseWithRouletteWheelSelection();
-					bs2 = mainPopulation.chooseWithRouletteWheelSelection();
+					bs1 = selectIndividual();
+					this.mutate(bs1);
+					newPopulation.addElement(bs1);
 				}
-				reproduceAndAddToPopulation(bs1, bs2, newPopulation);
 			}
 			
 			mainPopulation = newPopulation;
-			this.createMutations();
 		}
 		
-		private function applyNoSelection():Population {
-			var selectedPopulation:Population = new Population;
-			while(mainPopulation.size > 0){
-				selectedPopulation.addElement(mainPopulation.removeFirst());
+		private function selectIndividual():Individual {
+			var bs1:Individual;
+			if(this.selectionType == Parameters.TOURNAMENT_SELECTION){
+				bs1 = mainPopulation.chooseWithTournamentSelection();
+			}else if(this.selectionType == Parameters.ROULETTE_SELECTION){
+				bs1 = mainPopulation.chooseWithRouletteWheelSelection();
 			}
-			return selectedPopulation;
+			return bs1;
 		}
 		
 	
 		
 		private function reproduceAndAddToPopulation(bs1:Individual, bs2:Individual, population:Population):void{
-			//cross over or reinstert them into pupulation
-			if(Math.random() < this.crossOverProbability){
-				var children:Array;
-				//select crossover type randomly
-				var sample:Number = Math.random();
-				if(sample < .3){
-					children = bs1.randomInjectionBasedCrossOver(bs2, true);
-				}else if(sample < .6){
-					children = bs1.randomInjectionBasedCrossOver(bs2, false);
-				}else if(sample < .8){
-					children = bs1.partiallyMappedCrossover(bs2, true);
-				}else{
-					children = bs1.partiallyMappedCrossover(bs2, false);
-				}
-				//
-				var c0:Individual = children[0] as Individual;
-				var c1:Individual = children[1] as Individual;
-				population.addElement(c0);
-				population.addElement(c1);
-			}else{
-				population.addElement(bs1);
-				population.addElement(bs2);
+			if(Math.random() < .5){
+				var b:Individual = bs1;
+				bs1 = bs2;
+				bs2 = b;
 			}
+			//cross over or reinstert them into pupulation
+			var children:Array;
+			switch(this.parameters.getCrossoverType()){
+				case Parameters.ReversedPartiallyMappedCrossover:
+					children = bs1.partiallyMappedCrossover(bs2, true, true);
+					break;
+				case Parameters.OrderedPositionBasedCrossover:
+					children = bs1.randomInjectionBasedCrossOver(bs2, true);
+					break;
+				case Parameters.ParallelPositionBasedCrossover:
+					children = bs1.randomInjectionBasedCrossOver(bs2, false);
+					break;
+				case Parameters.OrderedPartiallyMappedCrossover:
+					children = bs1.partiallyMappedCrossover(bs2, true, false);
+					break;
+				case Parameters.ParallelPartiallyMappedCrossover:
+					children = bs1.partiallyMappedCrossover(bs2, false, false);
+					break;
+			}
+			//
+			var c0:Individual = children[0] as Individual;
+			var c1:Individual = children[1] as Individual;
+			this.mutate(c0);
+			this.mutate(c1);
+			population.addElement(c0);
+			population.addElement(c1);
 		}
 		
-		private function createMutations():void {
-			for(var i:uint = 0; i< mainPopulation.size; i++){
-				var bs:Individual = mainPopulation.getElement(i);
-				this.mutate(bs);
-			}
-		}
 		
 		private function mutate(bs:Individual):void {
 			if(Math.random() < this.mutationProbability){
-				var rand:Number = Math.random();
-				if(rand < .33){
-					bs.swapMutation();
-				}else if (rand < .66){
-					bs.reverseMutation();
-				}else{
-					bs.insertMutation();
+				switch(this.parameters.getMutationType()){
+					case Parameters.SwapMutation:
+						bs.swapMutation();
+						break;
+					case Parameters.ReverseMutation:
+						bs.reverseMutation();
+						break;
+					case Parameters.InsertMutation:
+						bs.insertMutation();
+						break;
+					case Parameters.RandomMutation:
+						if(Math.random() < .33){
+							bs.swapMutation();
+						}else if(Math.random() < .66){
+							bs.reverseMutation();
+						}else{
+							bs.insertMutation();
+						}
+						break;
 				}
 			}
 		}
@@ -291,7 +318,7 @@ package
 		
 		
 		private function createPopulation():void {
-			mainPopulation = new Population;	
+			mainPopulation = new Population(parameters);	
 			for(var i:uint = 0; i< populationSize; i++){
 				mainPopulation.addElement(new Individual(genomeLength));
 			}

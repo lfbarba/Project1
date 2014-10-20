@@ -15,10 +15,11 @@ package ga
 			super();
 			//set up combo
 			var options:Array = new Array;
-			options.push({label:"Ordered Partially Mapped Crossover", value: 0});
-			options.push({label:"Parallel Partially Mapped Crossover", value: 1});
-			options.push({label:"Ordered Position Based Crossover", value: 2});
-			options.push({label:"Parallel Position Based Crossover", value: 3});
+			options.push({label:"Reversed Partially Mapped Crossover", value: Parameters.ReversedPartiallyMappedCrossover});
+			options.push({label:"Ordered Partially Mapped Crossover", value: Parameters.OrderedPartiallyMappedCrossover});
+			options.push({label:"Parallel Partially Mapped Crossover", value: Parameters.ParallelPartiallyMappedCrossover});
+			options.push({label:"Ordered Position Based Crossover", value: Parameters.OrderedPositionBasedCrossover});
+			options.push({label:"Parallel Position Based Crossover", value: Parameters.ParallelPositionBasedCrossover});
 			
 			var dp:DataProvider = new DataProvider(options);
 			this.crossOverFunction.dataProvider = dp;
@@ -51,16 +52,19 @@ package ga
 			var itemsFromAInC1:Array = new Array;
 			var itemsFromBInC2:Array= new Array;
 			switch(this.crossOverFunction.selectedItem.value){
-				case 0: 
-					children = a.partiallyMappedCrossover(b, true, itemsFromAInC1, itemsFromBInC2);
+				case Parameters.ReversedPartiallyMappedCrossover: 
+					children = a.partiallyMappedCrossover(b, true, true, itemsFromAInC1, itemsFromBInC2);
 					break;
-				case 1: 
-					children = a.partiallyMappedCrossover(b, false, itemsFromAInC1, itemsFromBInC2);
+				case Parameters.OrderedPartiallyMappedCrossover: 
+					children = a.partiallyMappedCrossover(b, true, false, itemsFromAInC1, itemsFromBInC2);
 					break;
-				case 2: 
+				case Parameters.ParallelPartiallyMappedCrossover: 
+					children = a.partiallyMappedCrossover(b, false, false, itemsFromAInC1, itemsFromBInC2);
+					break;
+				case Parameters.OrderedPositionBasedCrossover: 
 					children = a.randomInjectionBasedCrossOver(b, true, itemsFromAInC1, itemsFromBInC2);
 					break;
-				case 3: 
+				case Parameters.ParallelPositionBasedCrossover: 
 					children = a.randomInjectionBasedCrossOver(b, false, itemsFromAInC1, itemsFromBInC2);
 					break;
 			}

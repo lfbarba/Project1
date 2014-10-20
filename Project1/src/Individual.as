@@ -35,7 +35,7 @@ package
 				//summ the distance between current and next
 				totalLength += Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
 			}
-			this.fitness =  Population.POPULATION_BAD_TRESHHOLD-totalLength;
+			this.fitness =  -1 * totalLength;
 		}
 		
 		public function drawIndividual(color:Number = 0, thickness:Number = 1):Sprite {
@@ -60,7 +60,7 @@ package
 			//randomly permute elements
 			for (i = 0 ; i < this.length ; i++){
 				var temp:uint = genome[i];
-				var randomIndex:uint = Math.floor(Math.random() * this.length);
+				var randomIndex:uint =  i + Math.floor(Math.random() * (this.length - i));
 				genome[i] = genome[randomIndex];
 				genome[randomIndex] = temp;
 			}
@@ -68,13 +68,20 @@ package
 		
 		//returns an array with the children
 		public function partiallyMappedCrossover(
-			bs:Individual, orderedOrParallel:Boolean, itemsFromThis:Array = null, itemsFromBs:Array = null):Array
+			bs:Individual, orderedOrParallel:Boolean, reversed:Boolean = false, 
+			itemsFromThis:Array = null, itemsFromBs:Array = null):Array
 		{
+			var reversed:Boolean = false;
+			if(Math.random() < .5){
+				this.genome.reverse();
+				reversed = true;
+				
+			}
 			//create an interval to exchange
-			var a:Number = Math.random();
-			var b:Number = Math.random();
-			var min:Number = Math.floor(Math.min(a,b)* this.length);
-			var max:Number = Math.ceil(Math.max(a,b)* this.length);
+			var a:Number = Math.floor(Math.random()* this.length);
+			var b:Number = Math.floor(Math.random()* this.length);
+			var min:Number = Math.min(a,b);
+			var max:Number = Math.max(a,b);
 			//copy
 			var child1:Array = new Array;
 			var child2:Array = new Array;
@@ -83,11 +90,24 @@ package
 			var copiedInto1:Array = new Array;
 			var copiedInto2:Array = new Array;
 			//
-			for(var i:uint = min; i <= max; i++){
-				child1[i] = genome[i];
-				copiedInto1[genome[i]] = true;
-				child2[i] = bs.genome[i];
-				copiedInto2[bs.genome[i]] = true;
+			
+			var offset1:uint = 0;//Math.floor(Math.random() * this.length);
+			var offset2:uint = 0;//Math.floor(Math.random() * this.length);
+			var i:uint;
+			if(reversed && Math.random() < .4){
+				for(i = min; i <= max; i++){
+					child1[max - i + min] = genome[(i + offset1) % length];
+					copiedInto1[genome[(i + offset1) % length]] = true;
+					child2[max - i + min] = bs.genome[(i + offset2) % length];
+					copiedInto2[bs.genome[(i + offset2) % length]] = true;
+				}
+			}else{
+				for(i = min; i <= max; i++){
+					child1[i] = genome[(i + offset1) % length];
+					copiedInto1[genome[(i + offset1) % length]] = true;
+					child2[i] = bs.genome[(i + offset2) % length];
+					copiedInto2[bs.genome[(i + offset2) % length]] = true;
+				}
 			}
 			
 			if(itemsFromThis != null){
@@ -99,11 +119,17 @@ package
 				}
 			}	
 			
+			var result:Array;
 			if(orderedOrParallel){
-				return this.orderedFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
+				result =  this.orderedFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
 			}else{
-				return this.paralellFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
+				result = this.paralellFillingEmptyEntries(bs, child1, child2, copiedInto1, copiedInto2);
 			}
+			if(reversed){
+				this.genome.reverse();
+			}
+			return result;
+			
 		}
 		
 		public function randomInjectionBasedCrossOver(
@@ -200,7 +226,6 @@ package
 				if(copiedInto2[genome[i]] != true)
 					notInChild2.push(genome[i]);
 			}
-			
 			for(i = 0; i < length; i++){
 				var randomIndex:uint;
 				var temp:Number;
@@ -230,37 +255,37 @@ package
 		
 		//swaps each entry with probability p
 		public function swapMutation(entryMutationProbability:Number = .5):void {
-			for(var i:uint = 0; i< this.length; i++){
-				if(Math.random() < entryMutationProbability){
+			//for(var i:uint = 0; i< this.length; i++){
+				//if(Math.random() < entryMutationProbability){
 					//swap randomly
+			var i:uint = Math.floor(Math.random() * this.length);
 					var temp:uint = genome[i];
 					var randomIndex:uint = Math.floor(Math.random() * this.length);
 					genome[i] = genome[randomIndex];
 					genome[randomIndex] = temp;
-				}
-			}
+				//}
+			//}
 			computeFitness();
 		}
 		
 		public function insertMutation(entryMutationProbability:Number = .5):void {
-			for(var i:uint = 0; i< this.length; i++){
-				if(Math.random() < entryMutationProbability){
-					//swap randomly
+			//for(var i:uint = 0; i< this.length; i++){
+				//if(Math.random() < entryMutationProbability){
+					//insert in some random location
+			var i:uint = Math.floor(Math.random() * this.length);
 					var temp:uint = genome[i];
 					genome.splice(i, 1);
 					genome.splice(Math.floor(Math.random() * this.length), 0 , temp); 
-				}
-			}
+				//}
+			//}
 			computeFitness();
 		}
 		
 		public function reverseMutation(maxSectionLength:int = -1):void {
-			
-			var str:String = genome.length+", " +this.genome.join(",");
-			var a:Number = Math.random();
-			var b:Number = Math.random();
-			var min:uint = Math.floor(Math.min(a,b)* this.length);
-			var max:uint = Math.floor(Math.max(a,b)* this.length);
+			var a:Number = Math.floor(Math.random()* this.length);
+			var b:Number = Math.floor(Math.random()* this.length);
+			var min:Number = Math.min(a,b);
+			var max:Number = Math.max(a,b);
 			
 			if(maxSectionLength != -1 && max - min > maxSectionLength){
 				max = min + maxSectionLength;
@@ -278,7 +303,7 @@ package
 		}
 		
 		public function toString():String {
-			return this.genome.join(",")+"\nFitness="+(Population.POPULATION_BAD_TRESHHOLD -this.fitness);
+			return this.genome.join(",")+"\nFitness="+(-1*this.fitness);
 		}
 	}
 }
