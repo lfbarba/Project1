@@ -68,11 +68,11 @@ package
 		
 		//returns an array with the children
 		public function partiallyMappedCrossover(
-			bs:Individual, orderedOrParallel:Boolean, reversed:Boolean = false, 
+			bs:Individual, orderedOrParallel:Boolean, toReversed:Boolean = false, 
 			itemsFromThis:Array = null, itemsFromBs:Array = null):Array
 		{
 			var reversed:Boolean = false;
-			if(Math.random() < .5){
+			if(toReversed && Math.random() < .5){
 				this.genome.reverse();
 				reversed = true;
 				
@@ -94,21 +94,21 @@ package
 			var offset1:uint = 0;//Math.floor(Math.random() * this.length);
 			var offset2:uint = 0;//Math.floor(Math.random() * this.length);
 			var i:uint;
-			if(reversed && Math.random() < .4){
+			/*if(toReversed && Math.random() < .4){
 				for(i = min; i <= max; i++){
 					child1[max - i + min] = genome[(i + offset1) % length];
 					copiedInto1[genome[(i + offset1) % length]] = true;
 					child2[max - i + min] = bs.genome[(i + offset2) % length];
 					copiedInto2[bs.genome[(i + offset2) % length]] = true;
 				}
-			}else{
+			}else{*/
 				for(i = min; i <= max; i++){
 					child1[i] = genome[(i + offset1) % length];
 					copiedInto1[genome[(i + offset1) % length]] = true;
 					child2[i] = bs.genome[(i + offset2) % length];
 					copiedInto2[bs.genome[(i + offset2) % length]] = true;
 				}
-			}
+			//}
 			
 			if(itemsFromThis != null){
 				for(var t in copiedInto1){
