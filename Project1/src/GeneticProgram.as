@@ -16,7 +16,7 @@ package
 	import ga.Population;
 	import ga.TspPoint;
 	
-	public class SimpleTSP extends Sprite
+	public class GeneticProgram extends Sprite
 	{
 		private var parameters:Parameters;
 		
@@ -50,54 +50,33 @@ package
 		
 		private var startButton:Button;
 		private var stopButton:Button;
-		private var openTester:Button;
 		
 		private var selectionFunction:Function;
 		
-		private var crossOverTester:CrossOverTester;
-		
 		private var selectionType:uint;
 		
-		public function SimpleTSP()
+		private var counter:uint = 0;
+		
+		public function GeneticProgram()
 		{
 			visualLayer = new Sprite;
 			this.addChild(visualLayer);
-			this.addEventListener(Event.ENTER_FRAME, fitIntoScreen);
-			
-			var ps:PointSet = new PointSet;
-			ps.readFromFile("berlin52.txt");
-			//ps.createPointInCricle();
-			this.setPointSet(ps);
 			
 			t = new Timer(0, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
-			
-			this.stage.doubleClickEnabled = true;
-			this.stage.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
 			
 			//botton para iniciar
 			startButton = new Button;
 			stopButton = new Button;
 			startButton.x = startButton. y  = stopButton.y = 20;
 			stopButton.x = 140;
-			startButton.label = "Start GA";
-			stopButton.label = "Stop GA";
+			startButton.label = "Start GP";
+			stopButton.label = "Stop GP";
 			this.addChild(startButton);
 			this.addChild(stopButton);
 			startButton.addEventListener(MouseEvent.CLICK, this.startGeneticAlgorithm);
 			stopButton.addEventListener(MouseEvent.CLICK, this.stopProcess);
 			//
-			this.openTester = new Button;
-			openTester.label = "CrossoverTester";
-			openTester.x = 20;
-			openTester.y = this.stage.stageHeight - 40;
-			this.addChild(openTester);
-			openTester.addEventListener(MouseEvent.CLICK, openCrossoverTester);
-			//
-			crossOverTester = new CrossOverTester;
-			crossOverTester.x = this.stage.stageWidth/2;
-			crossOverTester.y = this.stage.stageHeight/2;
-			this.addChild(crossOverTester);
 			
 			parameters = new Parameters;
 			parameters.x = this.stage.stageWidth;
@@ -113,36 +92,9 @@ package
 			this.selectionType = e.parameters.getSelectionType();
 		}
 		
-		private function openCrossoverTester(e:MouseEvent):void {
-			this.crossOverTester.testTwoRandomIndividuals(16);
-		}
-		
-		private function fitIntoScreen(e:Event = null){
-			var w:Number = CURRENT_POINTSET.width;
-			var h:Number = CURRENT_POINTSET.height;
-			var ratio:Number = Math.max(w/this.stage.stageWidth, h / this.stage.stageHeight);
-			if(ratio > 1){
-				visualLayer.scaleX = 1/ratio;
-				visualLayer.scaleY = -1/ratio;
-				visualLayer.y = this.stage.stageHeight;
-			}
-		}
-		
-		private function doubleClickHandler(e:MouseEvent):void {
-			var p:TspPoint = new TspPoint(e.stageX, e.stageY);
-			CURRENT_POINTSET.addPoint(p);
-		}
-		
-		public function setPointSet(ps:PointSet):void {
-			CURRENT_POINTSET = ps;
-			visualLayer.addChild(CURRENT_POINTSET);
-		}
-		
 		private function startGeneticAlgorithm(e:MouseEvent):void {
 			numGenerations = 0;
-			genomeLength = CURRENT_POINTSET.points.length;
 			createPopulation();
-			//this.printGeneration();
 			t.start();
 		}
 
@@ -165,8 +117,6 @@ package
 			t.start();
 		}
 		
-		
-		var counter:uint = 0;
 		private function populationHasConverged():Boolean {
 			if(this.mainPopulation.maximum - this.mainPopulation.average < this.convergenceTreshhold &&
 				this.mainPopulation.average - this.mainPopulation.minimum < this.convergenceTreshhold ){
@@ -247,8 +197,6 @@ package
 			var bs1:Individual;
 			if(this.selectionType == Parameters.TOURNAMENT_SELECTION){
 				bs1 = mainPopulation.chooseWithTournamentSelection();
-			}else if(this.selectionType == Parameters.ROULETTE_SELECTION){
-				bs1 = mainPopulation.chooseWithRouletteWheelSelection();
 			}
 			return bs1;
 		}

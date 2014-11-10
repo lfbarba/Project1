@@ -9,7 +9,7 @@ package gp.terminals
 		public function EphemeralTerminal()
 		{
 			super();
-			_value = Math.round(Math.random() * 10);
+			_value = 1+Math.floor(Math.random() * 9);
 		}
 		
 		override public function get value():* {

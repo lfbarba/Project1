@@ -30,8 +30,8 @@ package
 			var totalLength:Number = 0;
 			for(var i:uint = 0; i< this.length; i++){
 				//get the ith point according to the permutation in genome 
-				var current:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[i]] as TspPoint;
-				var next:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[(i+1) % length]] as TspPoint;
+				var current:TspPoint = GeneticProgram.CURRENT_POINTSET.points[genome[i]] as TspPoint;
+				var next:TspPoint = GeneticProgram.CURRENT_POINTSET.points[genome[(i+1) % length]] as TspPoint;
 				//summ the distance between current and next
 				totalLength += Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
 			}
@@ -41,11 +41,11 @@ package
 		public function drawIndividual(color:Number = 0, thickness:Number = 1):Sprite {
 			var draw:Sprite = new Sprite;
 			draw.graphics.lineStyle(thickness, color);
-			var first:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[0]] as TspPoint;
+			var first:TspPoint = GeneticProgram.CURRENT_POINTSET.points[genome[0]] as TspPoint;
 			draw.graphics.moveTo(first.x, first.y);
 			for(var i:uint = 1; i<= this.length; i++){
 				//get the ith point according to the permutation in genome 
-				var current:TspPoint = SimpleTSP.CURRENT_POINTSET.points[genome[i % length]] as TspPoint;
+				var current:TspPoint = GeneticProgram.CURRENT_POINTSET.points[genome[i % length]] as TspPoint;
 				draw.graphics.lineTo(current.x, current.y);
 			}
 			return draw;

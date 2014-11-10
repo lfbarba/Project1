@@ -2,6 +2,12 @@ package gp
 {
 	import flash.media.Camera;
 	
+	import gp.functions.CosineFunction;
+	import gp.functions.DivisionFunction;
+	import gp.functions.ExpFunction;
+	import gp.functions.ProductFunction;
+	import gp.functions.SineFunction;
+	import gp.functions.SubstractFunction;
 	import gp.functions.SumFunction;
 	import gp.terminals.EphemeralTerminal;
 	import gp.terminals.VariableTerminal;
@@ -10,30 +16,50 @@ package gp
 	{
 		public var root:TNode;
 		private var _functionsClasses:Array;
+		private var _fitness:Number;
+		private var _fitnessComputed:Boolean = false;
 		
 		public function FunctionTree()
 		{
-			_functionsClasses = new Array(SumFunction);
+			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
+				ProductFunction, SineFunction, CosineFunction, ExpFunction);
+		}
+		
+		public function get fitness():void {
+			if(!_fitnessComputed)
+				this.computeFitness();
+			return this._fitness;
+		}
+		
+		private function computeFitness():void {
+			
+			_fitnessComputed = true;
 		}
 	
 		public function mutate():void {
 			var rn:TNode = this.chooseRandomNode();
 			var t:FunctionTree = new FunctionTree;
 			if(Math.random() < .5){
-				t.generateRandomly(this.maxDepth - rn.depth, true);
+				t.generateRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), true);
 			}else{
-				t.generateRandomly(this.maxDepth - rn.depth, false);
+				t.generateRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), false);
 			}
 			if(rn.depth > 0){
 				rn.parent.replaceChild(rn, t.root);
 			}else{
 				this.root = t.root;
 			}
+			_fitnessComputed = false;
 		}
 		
-		public function crossOver(t:FunctionTree):void {
+		public function crossOver(t:FunctionTree, sizeFair:Boolean = true):void {
 			var rn1:TNode = this.chooseRandomNode();
-			var rn2:TNode = t.chooseRandomNode();
+			var rn2:TNode;
+			if(sizeFair){
+				rn2 = t.chooseRandomNode(2*rn1.size);
+			}else{
+				rn2 = t.chooseRandomNode();
+			}
 			var p1:TNode = (rn1.depth > 0) ? rn1.parent : null;
 			var p2:TNode = (rn2.depth > 0) ? rn2.parent : null;
 			if(p1 == null){//if rn1 is the root
@@ -46,25 +72,7 @@ package gp
 				p2.replaceChild(rn2, rn1);
 				p1.replaceChild(rn1, rn2);
 			}
-		}
-		
-		public function sizeFairCrossOver(t:FunctionTree):void {
-			var rn1:TNode = this.chooseRandomNode();
-			
-			
-			var rn2:TNode = t.chooseRandomNode();
-			var p1:TNode = (rn1.depth > 0) ? rn1.parent : null;
-			var p2:TNode = (rn2.depth > 0) ? rn2.parent : null;
-			if(p1 == null){//if rn1 is the root
-				//if rn2 is also the root then do nothing
-				if(p2 != null) {
-					p2.replaceChild(rn2, rn1);
-					this.root = rn2;
-				}
-			}else{
-				p2.replaceChild(rn2, rn1);
-				p1.replaceChild(rn1, rn2);
-			}
+			_fitnessComputed = false;
 		}
 		
 		public function get size():uint {
@@ -76,7 +84,7 @@ package gp
 			return this.root.maxDepth;
 		}
 		
-		public function chooseRandomNode(sizeAtMost:Number = Number.POSITIVE_INFINITY):TNode {
+		private function chooseRandomNode(sizeAtMost:Number = Number.POSITIVE_INFINITY):TNode {
 			var log:Array = new Array;
 			var current:TNode = root;
 			var counter:uint = 0;
@@ -95,9 +103,6 @@ package gp
 					current = current.parent;
 				}
 			}
-
-			trace(nodesWithRightSize);
-			
 			var index:uint = Math.floor(Math.random() * nodesWithRightSize.length);
 			return nodesWithRightSize[index];
 		}
@@ -108,12 +113,13 @@ package gp
 		}
 		
 		//generate randomly with half and half ramp
-		public function generateRandomly(maxDepth:uint, full:Boolean):void {
+		public function initializeRandomly(maxDepth:uint, full:Boolean):void {
 			if(full){
 				this.root = this.generateFull(maxDepth);
 			}else{
 				this.root = this.generateGrow(maxDepth);
 			}
+			_fitnessComputed = false;
 		}
 	
 		
