@@ -4,24 +4,21 @@ package ga
 	import fl.events.SliderEvent;
 	
 	import flash.events.Event;
+	
+	import gp.FuncionEvaluable;
+	import gp.targetFunctions.FunctionA;
 
 	public class Parameters extends ParametersBase
 	{	
 		public static var inst:Parameters;
 		
 		public static const TOURNAMENT_SELECTION:uint = 0;
-		public static const ROULETTE_SELECTION:uint = 1;
 		
-		public static var ReversedPartiallyMappedCrossover:uint = 0;
-		public static var OrderedPartiallyMappedCrossover:uint = 1;
-		public static var ParallelPartiallyMappedCrossover:uint = 2;
-		public static var OrderedPositionBasedCrossover:uint = 3;
-		public static var ParallelPositionBasedCrossover:uint = 4;
+		public static var SubtreeSwapCrossover:uint = 0;
+		public static var FairSubtreeSwapCrossover:uint = 1;
 		
-		public static var InsertMutation:uint = 0;
-		public static var ReverseMutation:uint = 1;
-		public static var SwapMutation:uint = 2;
-		public static var RandomMutation:uint = 3;
+		
+		public static var SubTreeReplacementMutation:uint = 0;
 		
 		
 		public function Parameters()
@@ -48,12 +45,6 @@ package ga
 			crossoverProbabilitySlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
 			this.crossoverProbabilitySlideBar.value = 1;
 			
-			var selectionOptions:Array = new Array;
-			selectionOptions.push({label:"Tournament Selection", value: TOURNAMENT_SELECTION});
-			selectionOptions.push({label:"Roulette Wheel Selection", value: ROULETTE_SELECTION});
-			this.selectionComboBox.dataProvider = new DataProvider(selectionOptions);
-			selectionComboBox.addEventListener(Event.CHANGE, changeHappened);
-			selectionComboBox.selectedIndex = 0;
 			
 			tournamentSelectionParameters.tournamentRangeSlideBar.maximum = 30;
 			tournamentSelectionParameters.tournamentRangeSlideBar.minimum = 1;
@@ -67,31 +58,22 @@ package ga
 			tournamentSelectionParameters.tournamentProbabilitySlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
 			tournamentSelectionParameters.tournamentProbabilitySlideBar.value = .54;
 			
-			rouletteParameters.roulettePreassureSliderBar.maximum = 1;
-			rouletteParameters.roulettePreassureSliderBar.minimum = 0;
-			rouletteParameters.roulettePreassureSliderBar.snapInterval = .05;
-			rouletteParameters.roulettePreassureSliderBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
-			rouletteParameters.roulettePreassureSliderBar.value = .5;
+			var targetFunction:Array = new Array;
+			targetFunction.push({label:"Select a function"});
+			targetFunction.push(new FunctionA);
+			targetFunctionComboBox.addEventListener(Event.CHANGE, this.changeHappened);
+			targetFunctionComboBox.dataProvider = new DataProvider(targetFunction);
 			
 			var crossoverOptions:Array = new Array;
-			crossoverOptions.push({label:"Reversed Partially Mapped Crossover", value: ReversedPartiallyMappedCrossover});
-			crossoverOptions.push({label:"Ordered Partially Mapped Crossover", value: OrderedPartiallyMappedCrossover});
-			crossoverOptions.push({label:"Parallel Partially Mapped Crossover", value: ParallelPartiallyMappedCrossover});
-			crossoverOptions.push({label:"Ordered Position Based Crossover", value: OrderedPositionBasedCrossover});
-			crossoverOptions.push({label:"Parallel Position Based Crossover", value: ParallelPositionBasedCrossover});
+			crossoverOptions.push({label:"Subtree Swap Crossover", value: SubtreeSwapCrossover});
+			crossoverOptions.push({label:"Fair Subtree Swap Crossover", value: FairSubtreeSwapCrossover});
 			crossoverComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			this.crossoverComboBox.dataProvider = new DataProvider(crossoverOptions);
 			
 			var mutationOptions:Array = new Array;
-			mutationOptions.push({label:"Random Mutation", value: RandomMutation});
-			mutationOptions.push({label:"Insert Mutation", value: InsertMutation});
-			mutationOptions.push({label:"Reverse Mutation", value: ReverseMutation});
-			mutationOptions.push({label:"Swap Mutation", value: SwapMutation});
+			mutationOptions.push({label:"SubTree Replacement Mutation", value: SubTreeReplacementMutation});
 			mutationComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			this.mutationComboBox.dataProvider = new DataProvider(mutationOptions);
-				
-			this.tournamentSelectionParameters.visible = true;
-			this.rouletteParameters.visible = false;
 		}
 		
 		private function addedStageHandler(e:Event):void {
@@ -103,7 +85,7 @@ package ga
 		}
 		
 		public function getSelectionType():uint {
-			return this.selectionComboBox.selectedItem.value as uint;
+			return TOURNAMENT_SELECTION;
 		}
 		
 		public function getPopulationSize():uint {
@@ -126,10 +108,6 @@ package ga
 			return tournamentSelectionParameters.tournamentRangeSlideBar.value;
 		}
 		
-		public function getRouletteSelectionPressure():Number {
-			return this.rouletteParameters.roulettePreassureSliderBar.value;
-		}
-		
 		public function getCrossoverType():uint {
 			return this.crossoverComboBox.selectedItem.value;
 		}
@@ -138,23 +116,21 @@ package ga
 			return this.mutationComboBox.selectedItem.value;
 		}
 		
+		public function getTargetFunction():FuncionEvaluable {
+			if(targetFunctionComboBox.selectedItem is FuncionEvaluable){
+				return this.targetFunctionComboBox.selectedItem as FuncionEvaluable;
+			} else {
+				return null;
+			}
+		}
+		
 		
 		private function changeHappened(e:Event = null):void {
-			if(this.selectionComboBox.selectedItem.value == TOURNAMENT_SELECTION){
-				this.tournamentSelectionParameters.visible = true;
-				this.rouletteParameters.visible = false;
-			}
-			if(this.selectionComboBox.selectedItem.value == ROULETTE_SELECTION){
-				this.tournamentSelectionParameters.visible = false;
-				this.rouletteParameters.visible = true;
-			}
-			
 			this.populationSize.text = String(this.populationSizeSlideBar.value);
 			this.mutationProbability.text = String(this.mutationProbabilitySlideBar.value);
 			this.crossoverProbability.text = String(this.crossoverProbabilitySlideBar.value);
 			this.tournamentSelectionParameters.tournamentSelecProbability.text = String(tournamentSelectionParameters.tournamentProbabilitySlideBar.value);
 			this.tournamentSelectionParameters.tournamentSelecRange.text = String(tournamentSelectionParameters.tournamentRangeSlideBar.value);
-			this.rouletteParameters.roulettePreassue.text = String(this.rouletteParameters.roulettePreassureSliderBar.value);
 			notifyChanges();
 		}
 		
@@ -163,7 +139,7 @@ package ga
 			this.dispatchEvent(e);
 		}
 		
-		public function updateStatistics(max:Number, min:Number, avg:Number, best:Number, current:Number){
+		public function updateStatistics(max:Number, min:Number, avg:Number, best:Number, current:Number):void{
 			this.maxFitness.text  = String(max);
 			this.minFitness.text = String(min);
 			this.avgFitness.text = String(avg);

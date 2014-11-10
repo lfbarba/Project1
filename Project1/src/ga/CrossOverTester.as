@@ -4,11 +4,12 @@ package ga
 	
 	import flash.events.MouseEvent;
 	import flash.ui.Mouse;
+	import gp.FunctionTree;
 
 	public class CrossOverTester extends CrossOverTesterFrame
 	{
-		private var a:Individual;
-		private var b:Individual;
+		private var a:FunctionTree;
+		private var b:FunctionTree;
 		
 		public function CrossOverTester()
 		{
@@ -38,8 +39,8 @@ package ga
 		public function testTwoRandomIndividuals(length:uint) {
 			this.visible = true;
 			
-			a = new Individual(length);
-			b = new Individual(length);
+			a = new FunctionTree(length);
+			b = new FunctionTree(length);
 			this.firstGenome.text = a.genome.join(",");
 			this.secondGenome.text = b.genome.join(",");
 			this.firstChild.text = "";
@@ -69,8 +70,8 @@ package ga
 					break;
 			}
 			
-			var c1:Individual = children[0] as Individual;
-			var c2:Individual = children[1] as Individual;
+			var c1:FunctionTree = children[0] as FunctionTree;
+			var c2:FunctionTree = children[1] as FunctionTree;
 			
 			
 			for(var i:uint = 0; i < c1.genome.length; i++){

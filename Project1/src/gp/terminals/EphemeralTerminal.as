@@ -12,6 +12,10 @@ package gp.terminals
 			_value = 1+Math.floor(Math.random() * 9);
 		}
 		
+		public function setValue(v:Number):void {
+			this._value = v;
+		}
+		
 		override public function get value():* {
 			return _value;
 		}

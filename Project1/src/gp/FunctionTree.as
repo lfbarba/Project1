@@ -1,6 +1,7 @@
 package gp
 {
 	import flash.media.Camera;
+	import flash.utils.*;
 	
 	import gp.functions.CosineFunction;
 	import gp.functions.DivisionFunction;
@@ -11,7 +12,7 @@ package gp
 	import gp.functions.SumFunction;
 	import gp.terminals.EphemeralTerminal;
 	import gp.terminals.VariableTerminal;
-
+	
 	public class FunctionTree implements FuncionEvaluable
 	{
 		public var root:TNode;
@@ -19,30 +20,41 @@ package gp
 		private var _fitness:Number;
 		private var _fitnessComputed:Boolean = false;
 		
-		public function FunctionTree()
+		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
 			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
 				ProductFunction, SineFunction, CosineFunction, ExpFunction);
+			if(copyFrom != null){
+				this.root = copyFrom.root.copy();
+			}
 		}
 		
-		public function get fitness():void {
+		
+		
+		public function get fitness():Number {
 			if(!_fitnessComputed)
 				this.computeFitness();
 			return this._fitness;
 		}
 		
 		private function computeFitness():void {
-			
+			var totalDifference:Number = 0;
+			for(var x:Number = -5; x <= 5; x= x+.1){
+				var yOpt:Number = GeneticProgram.TARGET_FUNCTION.evaluate(x);
+				var y:Number = this.evaluate(x);
+				totalDifference += Math.abs(yOpt - y);
+			}
+			this._fitness = -1* totalDifference;
 			_fitnessComputed = true;
 		}
-	
-		public function mutate():void {
+		
+		public function subTreeReplacementMutation():void {
 			var rn:TNode = this.chooseRandomNode();
 			var t:FunctionTree = new FunctionTree;
 			if(Math.random() < .5){
-				t.generateRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), true);
+				t.initializeRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), true);
 			}else{
-				t.generateRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), false);
+				t.initializeRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), false);
 			}
 			if(rn.depth > 0){
 				rn.parent.replaceChild(rn, t.root);
@@ -52,27 +64,37 @@ package gp
 			_fitnessComputed = false;
 		}
 		
-		public function crossOver(t:FunctionTree, sizeFair:Boolean = true):void {
-			var rn1:TNode = this.chooseRandomNode();
+		public function crossOver(t:FunctionTree, sizeFair:Boolean = true):Array {
+			//copy and crossover the copies
+			var child1:FunctionTree = new FunctionTree(this);
+			var child2:FunctionTree = new FunctionTree(t);
+			//
+			var rn1:TNode = child1.chooseRandomNode();
 			var rn2:TNode;
 			if(sizeFair){
-				rn2 = t.chooseRandomNode(2*rn1.size);
+				rn2 = child2.chooseRandomNode(2*rn1.size);
 			}else{
-				rn2 = t.chooseRandomNode();
+				rn2 = child2.chooseRandomNode();
 			}
+			trace("rn2", rn2);
 			var p1:TNode = (rn1.depth > 0) ? rn1.parent : null;
 			var p2:TNode = (rn2.depth > 0) ? rn2.parent : null;
+			trace("p1", p1);
+			trace("p2", p2);
 			if(p1 == null){//if rn1 is the root
 				//if rn2 is also the root then do nothing
 				if(p2 != null) {
 					p2.replaceChild(rn2, rn1);
 					this.root = rn2;
 				}
-			}else{
+			}else if(p2 == null){
+			 	p1.replaceChild(rn1, rn2);
+				t.root = rn1;
+			}else {
 				p2.replaceChild(rn2, rn1);
 				p1.replaceChild(rn1, rn2);
 			}
-			_fitnessComputed = false;
+			return new Array(child1, child2);
 		}
 		
 		public function get size():uint {
@@ -121,7 +143,7 @@ package gp
 			}
 			_fitnessComputed = false;
 		}
-	
+		
 		
 		public function getRandomFunctionNode():TFunction {
 			var c:Class = this._functionsClasses[Math.floor(Math.random() * _functionsClasses.length)];

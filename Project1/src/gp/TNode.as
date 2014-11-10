@@ -1,6 +1,8 @@
 package gp
 {
-	import flash.utils.*; 
+	import flash.utils.*;
+	
+	import gp.terminals.EphemeralTerminal;
 	
 	public class TNode
 	{
@@ -21,6 +23,21 @@ package gp
 		
 		public function get identifier():String {
 			return _identifier;
+		}
+		
+		public function copy():TNode {
+			var nodeClass:Class = Class(getDefinitionByName(getQualifiedClassName(this)));
+			var newNode:TNode = new nodeClass as TNode;
+			if(nodeClass == EphemeralTerminal){
+				var t:EphemeralTerminal = this as EphemeralTerminal;
+				var n:EphemeralTerminal = newNode as EphemeralTerminal;
+				n.setValue(t.value);
+			}
+			for(var i:uint; i < this.children.length; i++){
+				var child:TNode = this.children[i];
+				newNode.addChild(child.copy());
+			}
+			return newNode;
 		}
 		
 		public function replaceChild(old:TNode, nuevo:TNode):void {

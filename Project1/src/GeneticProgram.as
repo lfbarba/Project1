@@ -16,6 +16,11 @@ package
 	import ga.Population;
 	import ga.TspPoint;
 	
+	import gp.FuncionEvaluable;
+	import gp.FunctionTree;
+	
+	import grapher.Grapher;
+	
 	public class GeneticProgram extends Sprite
 	{
 		private var parameters:Parameters;
@@ -23,7 +28,7 @@ package
 		private var mainPopulation:Population;
 		
 		private var populationSize:uint;
-		private var genomeLength:uint;
+		private var initialDepthOfSubtrees:uint;
 		
 		private var mutationProbability:Number;
 		private var crossOverProbability:Number;
@@ -38,14 +43,12 @@ package
 		private var t:Timer;
 		
 		private var elitismNumber:uint = 10;
-		
-		public static var CURRENT_POINTSET:PointSet;
-		
+				
 		private var progressExampleLayer:Sprite;
 		
 		private var visualLayer:Sprite;
 		
-		private var bestIndividual:Individual;
+		private var bestIndividual:FunctionTree;
 		private var bestFitness:Number =  - 100000;
 		
 		private var startButton:Button;
@@ -56,6 +59,10 @@ package
 		private var selectionType:uint;
 		
 		private var counter:uint = 0;
+		
+		private var _grapher:Grapher;
+		private static var _targetFunction:FuncionEvaluable;
+		
 		
 		public function GeneticProgram()
 		{
@@ -77,7 +84,8 @@ package
 			startButton.addEventListener(MouseEvent.CLICK, this.startGeneticAlgorithm);
 			stopButton.addEventListener(MouseEvent.CLICK, this.stopProcess);
 			//
-			
+			setUpGrapher();
+			//
 			parameters = new Parameters;
 			parameters.x = this.stage.stageWidth;
 			parameters.y = 0;
@@ -85,11 +93,32 @@ package
 			this.addChild(parameters);
 		}
 		
+		public static function get TARGET_FUNCTION():FuncionEvaluable {
+			return _targetFunction;
+		}
+		
+		private function setUpGrapher():void {
+			if(_grapher != null && this.contains(_grapher)){
+				this.removeChild(_grapher);
+			}
+			_grapher = new Grapher(800, 600, -5, 5);
+			_grapher.drawBackground(200, 10);
+			visualLayer.addChild(_grapher);
+		}
+		
 		private function parametersChangeHandler(e:ParametersChangeEvent):void {
 			this.populationSize = e.parameters.getPopulationSize();
 			this.crossOverProbability = e.parameters.getCrossoverProbability();
 			this.mutationProbability = e.parameters.getMutationProbability();
 			this.selectionType = e.parameters.getSelectionType();
+			if(e.parameters.getTargetFunction() != null){
+				this._grapher.clearPlots();
+				this._grapher.plotFunction(e.parameters.getTargetFunction(), 0xFF0000);
+				_targetFunction = e.parameters.getTargetFunction();
+			}else{
+				this._grapher.clearPlots();
+				_targetFunction = null;
+			}
 		}
 		
 		private function startGeneticAlgorithm(e:MouseEvent):void {
@@ -114,7 +143,7 @@ package
 				//
 				numGenerations++;
 			}
-			t.start();
+			//t.start();
 		}
 		
 		private function populationHasConverged():Boolean {
@@ -129,20 +158,20 @@ package
 		private function printGeneration():void {
 			mainPopulation.sortByFitness(Array.DESCENDING || Array.NUMERIC);
 			for(var i:uint = 0; i< mainPopulation.size; i++){
-				var bs:Individual = mainPopulation.getElement(i);
+				var bs:FunctionTree = mainPopulation.getElement(i);
 				trace(bs.toString());
 			}
 		}
 		
-		private function showIndividual(p:Individual):void {
+		private function showIndividual(p:FunctionTree):void {
 			if(progressExampleLayer != null && visualLayer.contains(progressExampleLayer)){
 				visualLayer.removeChild(progressExampleLayer);
 			}
-			progressExampleLayer = new Sprite;
-			visualLayer.addChild(progressExampleLayer);
-			if(bestIndividual != null)
-				progressExampleLayer.addChild(bestIndividual.drawIndividual(0x0000FF, 6));
-			progressExampleLayer.addChild(p.drawIndividual());	
+			if(bestIndividual != null && _targetFunction != null){
+				this._grapher.clearPlots();
+				this._grapher.plotFunction(_targetFunction, 0xFF0000);
+				this._grapher.plotFunction(bestIndividual);
+			}
 		}
 		
 		private function reportStatistics():void {
@@ -162,10 +191,10 @@ package
 			mainPopulation.computePopulationFitness();
 			reportStatistics();
 			//show the best individual so far
-			var best:Individual = mainPopulation.getElement(0);
+			var best:FunctionTree = mainPopulation.getElement(0);
 			if(best.fitness  >  bestFitness){
 				bestFitness = best.fitness;
-				bestIndividual = new Individual(best.length, true, best.genome);
+				bestIndividual = new FunctionTree(best);
 			}
 			this.showIndividual(mainPopulation.getElement(0));
 			
@@ -177,8 +206,8 @@ package
 			
 			//reproduce the strings
 			while(newPopulation.size < this.populationSize){
-				var bs1:Individual;
-				var bs2:Individual;
+				var bs1:FunctionTree;
+				var bs2:FunctionTree;
 				if(Math.random() < this.crossOverProbability){
 					bs1 = selectIndividual();
 					bs2 = selectIndividual();
@@ -193,8 +222,8 @@ package
 			mainPopulation = newPopulation;
 		}
 		
-		private function selectIndividual():Individual {
-			var bs1:Individual;
+		private function selectIndividual():FunctionTree {
+			var bs1:FunctionTree;
 			if(this.selectionType == Parameters.TOURNAMENT_SELECTION){
 				bs1 = mainPopulation.chooseWithTournamentSelection();
 			}
@@ -203,34 +232,21 @@ package
 		
 	
 		
-		private function reproduceAndAddToPopulation(bs1:Individual, bs2:Individual, population:Population):void{
-			if(Math.random() < .5){
-				var b:Individual = bs1;
-				bs1 = bs2;
-				bs2 = b;
-			}
+		private function reproduceAndAddToPopulation(bs1:FunctionTree, bs2:FunctionTree, population:Population):void{
 			//cross over or reinstert them into pupulation
 			var children:Array;
 			switch(this.parameters.getCrossoverType()){
-				case Parameters.ReversedPartiallyMappedCrossover:
-					children = bs1.partiallyMappedCrossover(bs2, true, true);
+				case Parameters.SubtreeSwapCrossover:
+					children = bs1.crossOver(bs2, false);
 					break;
-				case Parameters.OrderedPositionBasedCrossover:
-					children = bs1.randomInjectionBasedCrossOver(bs2, true);
-					break;
-				case Parameters.ParallelPositionBasedCrossover:
-					children = bs1.randomInjectionBasedCrossOver(bs2, false);
-					break;
-				case Parameters.OrderedPartiallyMappedCrossover:
-					children = bs1.partiallyMappedCrossover(bs2, true, false);
-					break;
-				case Parameters.ParallelPartiallyMappedCrossover:
-					children = bs1.partiallyMappedCrossover(bs2, false, false);
+				case Parameters.FairSubtreeSwapCrossover:
+					children = bs1.crossOver(bs2, true);
 					break;
 			}
+			trace(children);
 			//
-			var c0:Individual = children[0] as Individual;
-			var c1:Individual = children[1] as Individual;
+			var c0:FunctionTree = children[0] as FunctionTree;
+			var c1:FunctionTree = children[1] as FunctionTree;
 			this.mutate(c0);
 			this.mutate(c1);
 			population.addElement(c0);
@@ -238,26 +254,11 @@ package
 		}
 		
 		
-		private function mutate(bs:Individual):void {
+		private function mutate(bs:FunctionTree):void {
 			if(Math.random() < this.mutationProbability){
 				switch(this.parameters.getMutationType()){
-					case Parameters.SwapMutation:
-						bs.swapMutation();
-						break;
-					case Parameters.ReverseMutation:
-						bs.reverseMutation();
-						break;
-					case Parameters.InsertMutation:
-						bs.insertMutation();
-						break;
-					case Parameters.RandomMutation:
-						if(Math.random() < .33){
-							bs.swapMutation();
-						}else if(Math.random() < .66){
-							bs.reverseMutation();
-						}else{
-							bs.insertMutation();
-						}
+					case Parameters.SubTreeReplacementMutation:
+						bs.subTreeReplacementMutation();
 						break;
 				}
 			}
@@ -266,10 +267,23 @@ package
 		
 		
 		private function createPopulation():void {
+			var repetition:Array = new Array;
 			mainPopulation = new Population(parameters);	
-			for(var i:uint = 0; i< populationSize; i++){
-				mainPopulation.addElement(new Individual(genomeLength));
+			var depth:uint = 1;
+			var blockSize:uint = Math.floor(populationSize/initialDepthOfSubtrees);
+			var i:uint = 0;
+			while(i < populationSize){
+				if(i % blockSize == 0)
+					depth ++;
+				var t:FunctionTree = new FunctionTree;
+				t.initializeRandomly(depth, (i%2 == 0));
+				if(repetition[t.toString()] == undefined){
+					mainPopulation.addElement(t);
+					repetition[t.toString()] = true;
+					i++;
+				}
 			}
+			trace("population created");
 		}
 	}
 }

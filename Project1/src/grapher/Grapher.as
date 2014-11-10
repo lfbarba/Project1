@@ -5,9 +5,9 @@ package grapher
 	import flash.geom.Point;
 	
 	import gp.FuncionEvaluable;
-	import gp.FunctionA;
 	import gp.FunctionTree;
 	import gp.TFunction;
+	import gp.targetFunctions.FunctionA;
 	
 	public class Grapher extends Sprite
 	{
@@ -29,16 +29,22 @@ package grapher
 			_intervalMax = max;
 			_plottedPoints = new Array;
 			super();
+			
 			drawBackground(200, 20);
-			//
-			var f:FunctionA = new FunctionA;
-			this.plotFunction(f);
 		}
 		
-		public function plotFunction(f:FuncionEvaluable, resolution:Number = .05):void {
+		public function plotFunction(f:FuncionEvaluable, color:Number = 0, resolution:Number = .1):void {
 			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
 				var y:Number = f.evaluate(x);
-				this.plotPoint(x, y);
+				var xx:Number = x - resolution/2;
+				var yy:Number = f.evaluate(xx);
+				_plot.graphics.lineStyle(1, color, 1, true, LineScaleMode.NONE);
+				//this.plotPoint(x, y, color);
+				if(x == _intervalMin){
+					_plot.graphics.moveTo(coordinates(x,y).x, coordinates(x,y).y);
+				}else{
+					_plot.graphics.curveTo(coordinates(xx,yy).x, coordinates(xx,yy).y, coordinates(x,y).x, coordinates(x,y).y);
+				}
 			}
 		}
 		
@@ -53,13 +59,21 @@ package grapher
 			p.y = coordinates(x,y).y;
 		}
 		
+		public function clearPlots():void {
+			if(_plot != null && this.contains(_plot)){
+				this.removeChild(_plot);
+			}
+			_plot = new Sprite;
+			this.addChildAt(_plot, 1); 
+		}
+		
 		private function coordinates(x:Number, y:Number):Point {			
 			var p:Point = new Point(x, -y);
 			 p = _bkg.localToGlobal(p);
 			return p;
 		}
 		
-		private function drawBackground(ySpread:Number = 200, hResolution:uint = 1):void {
+		public function drawBackground(ySpread:Number = 200, hResolution:uint = 1):void {
 			if(_bkg != null && this.contains(_bkg)){
 				this.removeChildAt(0);
 			}
@@ -93,8 +107,7 @@ package grapher
 			_bkg.x = _width/2;
 			//create plot layer
 			if(_plot == null){
-				_plot = new Sprite;
-				this.addChildAt(_plot, 1);
+				clearPlots();
 			}
 			var rect:Sprite = new Sprite;
 			rect.graphics.beginFill(0);

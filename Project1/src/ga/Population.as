@@ -5,6 +5,8 @@ package ga
 	import flash.net.URLRequest;
 	
 	import flashx.textLayout.elements.ParagraphElement;
+	
+	import gp.FunctionTree;
 
 	public class Population
 	{
@@ -63,8 +65,8 @@ package ga
 			return this.populationSum;
 		}
 		
-		public function getElement(index:uint):Individual {
-			return this.population[index] as Individual;
+		public function getElement(index:uint):FunctionTree {
+			return this.population[index] as FunctionTree;
 		}
 		
 		public function get size():uint {
@@ -75,32 +77,32 @@ package ga
 			population.sortOn("fitness", order);
 		}
 		
-		public function removeLast():Individual {
+		public function removeLast():FunctionTree {
 			fitnessComputed = false;
-			return population.pop() as Individual;	
+			return population.pop() as FunctionTree;	
 		}
 		
-		public function removeFirst():Individual {
+		public function removeFirst():FunctionTree {
 			fitnessComputed = false;
-			return population.shift() as Individual;
+			return population.shift() as FunctionTree;
 			
 		}
 		
-		public function addElement(bs:Individual):void {
+		public function addElement(bs:FunctionTree):void {
 			fitnessComputed = false;
 			this.population.push(bs);
 		}
 		
-		public function selectIndividualAtRandom(subpopulation:Array):Individual {
-			return subpopulation[Math.floor(Math.random() * subpopulation.length)] as Individual;
+		public function selectIndividualAtRandom(subpopulation:Array):FunctionTree {
+			return subpopulation[Math.floor(Math.random() * subpopulation.length)] as FunctionTree;
 		}
 		
-		public function chooseWithTournamentSelection():Individual {
+		public function chooseWithTournamentSelection():FunctionTree {
 			var candidates:Array = new Array;
 			var max:Number = Number.NEGATIVE_INFINITY;
-			var best:Individual;
+			var best:FunctionTree;
 			for(var i:uint = 0; i < tournamentSelectionRange; i++){
-				var ind:Individual = this.population[Math.floor(Math.random() * this.size)] as Individual;
+				var ind:FunctionTree = this.population[Math.floor(Math.random() * this.size)] as FunctionTree;
 				if(max < ind.fitness){
 					max = ind.fitness;
 					best = ind;
@@ -123,7 +125,7 @@ package ga
 			var squareSum:Number = 0;
 			
 			for(var i:uint = 0; i< population.length; i++){
-				var bs:Individual = population[i] as Individual;
+				var bs:FunctionTree = population[i] as FunctionTree;
 				sum += bs.fitness;
 				max = Math.max(bs.fitness, max);
 				min = Math.min(bs.fitness, min);
