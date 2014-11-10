@@ -5,6 +5,7 @@ package gp
 	public class TNode
 	{
 		
+		private var _identifier:String;
 		public var children:Array;
 		private var _numChildren:uint = 0;
 		
@@ -15,6 +16,11 @@ package gp
 		public function TNode()
 		{
 			children = new Array;
+			_identifier = String(Math.random() * Math.random());
+		}
+		
+		public function get identifier():String {
+			return _identifier;
 		}
 		
 		public function replaceChild(old:TNode, nuevo:TNode):void {

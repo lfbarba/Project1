@@ -6,7 +6,7 @@ package gp
 	import gp.terminals.EphemeralTerminal;
 	import gp.terminals.VariableTerminal;
 
-	public class FunctionTree
+	public class FunctionTree implements FuncionEvaluable
 	{
 		public var root:TNode;
 		private var _functionsClasses:Array;
@@ -48,6 +48,25 @@ package gp
 			}
 		}
 		
+		public function sizeFairCrossOver(t:FunctionTree):void {
+			var rn1:TNode = this.chooseRandomNode();
+			
+			
+			var rn2:TNode = t.chooseRandomNode();
+			var p1:TNode = (rn1.depth > 0) ? rn1.parent : null;
+			var p2:TNode = (rn2.depth > 0) ? rn2.parent : null;
+			if(p1 == null){//if rn1 is the root
+				//if rn2 is also the root then do nothing
+				if(p2 != null) {
+					p2.replaceChild(rn2, rn1);
+					this.root = rn2;
+				}
+			}else{
+				p2.replaceChild(rn2, rn1);
+				p1.replaceChild(rn1, rn2);
+			}
+		}
+		
 		public function get size():uint {
 			return this.root.size;
 		}
@@ -57,23 +76,30 @@ package gp
 			return this.root.maxDepth;
 		}
 		
-		private function chooseRandomNode():TNode {
-			var index:uint = Math.floor(Math.random() *root.size);
-			//do depth first search and return the index-th node
+		public function chooseRandomNode(sizeAtMost:Number = Number.POSITIVE_INFINITY):TNode {
 			var log:Array = new Array;
 			var current:TNode = root;
-			var counter:uint= 0;
-			while(counter < index) {
-				log[current] = (log[current] == undefined) ? 0 : log[current];
-				if(log[current] < current.numChildren){
-					log[current]++;
-					current = current.children[log[current]-1];
+			var counter:uint = 0;
+			var nodesWithRightSize:Array = new Array;
+			if(root.size <= sizeAtMost)
+				nodesWithRightSize.push(root);
+			while(current.parent != null || counter != this.size-1) {
+				log[current.identifier] = (log[current.identifier] == undefined) ? 0 : log[current.identifier];
+				if(log[current.identifier] < current.numChildren){
+					log[current.identifier]++;
+					current = current.children[log[current.identifier]-1];
+					counter ++;
+					if(current.size <= sizeAtMost)
+						nodesWithRightSize.push(current);
 				}else{//return to parent
 					current = current.parent;
 				}
-				counter ++;
 			}
-			return current;
+
+			trace(nodesWithRightSize);
+			
+			var index:uint = Math.floor(Math.random() * nodesWithRightSize.length);
+			return nodesWithRightSize[index];
 		}
 		
 		public function evaluate(x:Number):Number {
