@@ -23,7 +23,7 @@ package gp
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
 			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
-				ProductFunction, SineFunction, CosineFunction, ExpFunction);
+				ProductFunction, SineFunction, CosineFunction);//, ExpFunction);
 			if(copyFrom != null){
 				this.root = copyFrom.root.copy();
 			}
@@ -45,6 +45,7 @@ package gp
 				totalDifference += Math.abs(yOpt - y);
 			}
 			this._fitness = -1* totalDifference;
+			trace(this, _fitness);
 			_fitnessComputed = true;
 		}
 		
@@ -76,11 +77,8 @@ package gp
 			}else{
 				rn2 = child2.chooseRandomNode();
 			}
-			trace("rn2", rn2);
 			var p1:TNode = (rn1.depth > 0) ? rn1.parent : null;
 			var p2:TNode = (rn2.depth > 0) ? rn2.parent : null;
-			trace("p1", p1);
-			trace("p2", p2);
 			if(p1 == null){//if rn1 is the root
 				//if rn2 is also the root then do nothing
 				if(p2 != null) {
@@ -107,25 +105,32 @@ package gp
 		}
 		
 		private function chooseRandomNode(sizeAtMost:Number = Number.POSITIVE_INFINITY):TNode {
-			var log:Array = new Array;
-			var current:TNode = root;
-			var counter:uint = 0;
-			var nodesWithRightSize:Array = new Array;
-			if(root.size <= sizeAtMost)
-				nodesWithRightSize.push(root);
-			while(current.parent != null || counter != this.size-1) {
-				log[current.identifier] = (log[current.identifier] == undefined) ? 0 : log[current.identifier];
-				if(log[current.identifier] < current.numChildren){
-					log[current.identifier]++;
-					current = current.children[log[current.identifier]-1];
-					counter ++;
-					if(current.size <= sizeAtMost)
-						nodesWithRightSize.push(current);
-				}else{//return to parent
-					current = current.parent;
+			try{
+				var log:Array = new Array;
+				var current:TNode = root;
+				var nodesWithRightSize:Array = new Array;
+				if(root.size <= sizeAtMost)
+					nodesWithRightSize.push(root);
+				while(current != null) 
+				{
+					log[current.identifier] = (log[current.identifier] == undefined) ? 0 : log[current.identifier];
+					if(log[current.identifier] < current.numChildren){
+						log[current.identifier]++;
+						current = current.children[log[current.identifier]-1];
+						if(current.size <= sizeAtMost)
+							nodesWithRightSize.push(current);
+					}else{//return to parent
+						current = current.parent;
+					}
 				}
+				var index:uint = Math.floor(Math.random() * nodesWithRightSize.length);
+			}catch(e:Error){
+				trace(e);
+				trace(this);
+				trace("nodesWithRightSize", nodesWithRightSize);
+				trace("current", current);
+				throw e;
 			}
-			var index:uint = Math.floor(Math.random() * nodesWithRightSize.length);
 			return nodesWithRightSize[index];
 		}
 		

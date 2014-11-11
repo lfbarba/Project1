@@ -11,8 +11,8 @@ package
 			super();
 			var tree:FunctionTree = new FunctionTree;
 			var tree2:FunctionTree = new FunctionTree;
-			tree.initializeRandomly(1, true);
-			tree2.initializeRandomly(1, true);
+			tree.initializeRandomly(4, true);
+			tree2.initializeRandomly(4, true);
 			
 			
 			trace(tree.toString(), "value", tree.evaluate(10), "size", tree.size, "depth", tree.maxDepth);
@@ -21,6 +21,10 @@ package
 			var children:Array = tree.crossOver(tree2, false);
 			trace(children[0].toString(), "value", children[0].evaluate(10), "size", children[0].size, "depth", children[0].maxDepth);
 			trace(children[1].toString(), "value", children[1].evaluate(10), "size", children[1].size, "depth", children[1].maxDepth);
+			
+			tree.subTreeReplacementMutation();
+			trace(tree.toString(), "value", tree.evaluate(10), "size", tree.size, "depth", tree.maxDepth);
+			
 		}
 	}
 }

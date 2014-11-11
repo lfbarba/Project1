@@ -28,7 +28,7 @@ package
 		private var mainPopulation:Population;
 		
 		private var populationSize:uint;
-		private var initialDepthOfSubtrees:uint;
+		private var initialDepthOfSubtrees:uint = 5;
 		
 		private var mutationProbability:Number;
 		private var crossOverProbability:Number;
@@ -243,7 +243,6 @@ package
 					children = bs1.crossOver(bs2, true);
 					break;
 			}
-			trace(children);
 			//
 			var c0:FunctionTree = children[0] as FunctionTree;
 			var c1:FunctionTree = children[1] as FunctionTree;
@@ -258,7 +257,7 @@ package
 			if(Math.random() < this.mutationProbability){
 				switch(this.parameters.getMutationType()){
 					case Parameters.SubTreeReplacementMutation:
-						bs.subTreeReplacementMutation();
+						//bs.subTreeReplacementMutation();
 						break;
 				}
 			}
