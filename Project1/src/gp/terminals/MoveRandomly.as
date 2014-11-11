@@ -1,19 +1,21 @@
 package gp.terminals
 {
+	import ants.Ant;
+	
 	import gp.TNode;
 	import gp.TTerminal;
 	
-	public class VariableTerminal extends TNode implements TTerminal
+	public class MoveRandomly extends TNode implements TTerminal
 	{
-		public static var XVALUE:Number;
-		
-		public function VariableTerminal()
+
+		public function MoveRandomly()
 		{
 			super();
 		}
 		
-		override public function get value():* {
-			return XVALUE;
+		override public function get evaluate():* {
+			var a:Ant = Ant.currentAnt;
+			a.moveRandomly();
 		}
 		
 		override public function get size():uint {
@@ -25,7 +27,7 @@ package gp.terminals
 		}
 		
 		override public function toString():String {
-			return "x";
+			return indent+"MoveRandomly";
 		}
 	}
 }

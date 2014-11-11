@@ -1,13 +1,16 @@
 package gp.functions
 {
+	import ants.Ant;
+	
 	import gp.TFunction;
 	import gp.TNode;
+	import gp.terminals.MoveRandomly;
 
-	public class ExpFunction extends TNode implements TFunction
+	public class IfFood extends TNode implements TFunction
 	{
 		private var arg1:TNode;
 		
-		public function ExpFunction()
+		public function IfFood()
 		{
 			super();
 		}
@@ -28,22 +31,27 @@ package gp.functions
 		
 		private function setArgs():void {
 			if(this.children.length != this.numArguments){
-				throw(new Error("Childrens not assigned for Exp function"));
+				throw(new Error("Childrens not assigned for IfFood function"));
 			}
 			arg1 = this.children[0];
 		}
 		
-		override public function get value():* {
+		override public function get evaluate():* {
 			setArgs();
-			return Math.exp(arg1.value);
+			var a:Ant = Ant.currentAnt;
+			if(a.isThereFood){
+				a.pickFood();
+			}else{
+				arg1.evaluate;
+			}
 		}
 		
 		override public function toString():String {
 			if(this.children.length != this.numArguments){
-				return "Exp Function node, agrs not defined";
+				return "IfFood Function node, agrs not defined";
 			}else{
 				setArgs();
-				return "exp("+arg1.toString()+")";
+				return indent + "IF Food then \n"+indent+" PickFood\n"+indent+"else \n"+ arg1.toString();
 			}
 		}
 	}

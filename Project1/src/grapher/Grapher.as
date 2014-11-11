@@ -7,7 +7,6 @@ package grapher
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
 	import gp.TFunction;
-	import gp.targetFunctions.FunctionA;
 	
 	public class Grapher extends Sprite
 	{
@@ -35,16 +34,7 @@ package grapher
 		
 		public function plotFunction(f:FuncionEvaluable, color:Number = 0, resolution:Number = .1):void {
 			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
-				var y:Number = f.evaluate(x);
-				var xx:Number = x - resolution/2;
-				var yy:Number = f.evaluate(xx);
-				_plot.graphics.lineStyle(1, color, 1, true, LineScaleMode.NONE);
-				//this.plotPoint(x, y, color);
-				if(x == _intervalMin){
-					_plot.graphics.moveTo(coordinates(x,y).x, coordinates(x,y).y);
-				}else{
-					_plot.graphics.curveTo(coordinates(xx,yy).x, coordinates(xx,yy).y, coordinates(x,y).x, coordinates(x,y).y);
-				}
+				
 			}
 		}
 		

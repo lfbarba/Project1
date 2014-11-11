@@ -1,14 +1,16 @@
 package gp.functions
 {
+	import ants.Ant;
+	
 	import gp.TFunction;
 	import gp.TNode;
 
-	public class ProductFunction extends TNode implements TFunction
+	public class IfCarryingFood extends TNode implements TFunction
 	{
 		private var arg1:TNode;
 		private var arg2:TNode;
 		
-		public function ProductFunction()
+		public function IfCarryingFood()
 		{
 			super();
 		}
@@ -29,23 +31,28 @@ package gp.functions
 		
 		private function setArgs():void {
 			if(this.children.length != this.numArguments){
-				throw(new Error("Childrens not assigned for Product function"));
+				throw(new Error("Childrens not assigned for IfCarryingFood function"));
 			}
 			arg1 = this.children[0];
 			arg2 = this.children[1];
 		}
 		
-		override public function get value():* {
+		override public function get evaluate():* {
 			setArgs();
-			return arg1.value * arg2.value;
+			var a:Ant = Ant.currentAnt;
+			if(a.hasFood){
+				arg1.evaluate;
+			}else{
+				arg2.evaluate;
+			}
 		}
 		
 		override public function toString():String {
 			if(this.children.length != this.numArguments){
-				return "Product Function node, agrs not defined";
+				return "IfCarryingFood Function node, agrs not defined";
 			}else{
 				setArgs();
-				return "("+arg1.toString() + " * "+ arg2.toString()+")";
+				return indent+ "IF CarryingFood then \n"+ arg1.toString() + "\n"+indent+"else \n"+ arg2.toString();
 			}
 		}
 	}

@@ -1,19 +1,29 @@
 package gp.functions
 {
+	import ants.Ant;
+	
 	import gp.TFunction;
 	import gp.TNode;
-
-	public class SineFunction extends TNode implements TFunction
+	import gp.TTerminal;
+	
+	public class DropFood extends TNode implements TFunction
 	{
 		private var arg1:TNode;
-		
-		public function SineFunction()
+
+		public function DropFood()
 		{
 			super();
 		}
 		
 		public function get numArguments():uint{
 			return 1;
+		}
+		
+		override public function get evaluate():* {
+			setArgs();
+			var a:Ant = Ant.currentAnt;
+			a.dropFood();
+			arg1.evaluate;
 		}
 		
 		override public function get size():uint {
@@ -28,23 +38,13 @@ package gp.functions
 		
 		private function setArgs():void {
 			if(this.children.length != this.numArguments){
-				throw(new Error("Childrens not assigned for sine function"));
+				throw(new Error("DropFood not assigned for IfFood function"));
 			}
 			arg1 = this.children[0];
 		}
 		
-		override public function get value():* {
-			setArgs();
-			return Math.sin(arg1.value);
-		}
-		
 		override public function toString():String {
-			if(this.children.length != this.numArguments){
-				return "Sine Function node, agrs not defined";
-			}else{
-				setArgs();
-				return "sin("+arg1.toString()+")";
-			}
+			return indent+"DropFood"+"\n"+ arg1.toString();
 		}
 	}
 }

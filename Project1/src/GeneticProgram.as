@@ -9,12 +9,9 @@ package
 	import flash.geom.Point;
 	import flash.utils.Timer;
 	
-	import ga.CrossOverTester;
 	import ga.Parameters;
 	import ga.ParametersChangeEvent;
-	import ga.PointSet;
 	import ga.Population;
-	import ga.TspPoint;
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;

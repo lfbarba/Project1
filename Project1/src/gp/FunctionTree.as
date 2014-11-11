@@ -3,27 +3,23 @@ package gp
 	import flash.media.Camera;
 	import flash.utils.*;
 	
-	import gp.functions.CosineFunction;
-	import gp.functions.DivisionFunction;
-	import gp.functions.ExpFunction;
-	import gp.functions.ProductFunction;
-	import gp.functions.SineFunction;
-	import gp.functions.SubstractFunction;
-	import gp.functions.SumFunction;
-	import gp.terminals.EphemeralTerminal;
-	import gp.terminals.VariableTerminal;
+	import gp.functions.*;
+	import gp.terminals.*;
 	
 	public class FunctionTree implements FuncionEvaluable
 	{
 		public var root:TNode;
 		private var _functionsClasses:Array;
+		private var _terminalClasses:Array;
 		private var _fitness:Number;
 		private var _fitnessComputed:Boolean = false;
 		
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
-			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
-				ProductFunction, SineFunction, CosineFunction);//, ExpFunction);
+
+			_functionsClasses = new Array(IfCarryingFood, IfFood, IfNest, IfPherormone);
+			_terminalClasses = new Array(DropFood, DropPherormone, MoveRandomly, MoveToNest, MoveToPherormone);
+			
 			if(copyFrom != null){
 				this.root = copyFrom.root.copy();
 			}
@@ -41,17 +37,7 @@ package gp
 		}
 		
 		private function computeFitness():void {
-			var totalDifference:Number = 0;
-			for(var x:Number = -5; x <= 5; x= x+.5){
-				var yOpt:Number = GeneticProgram.TARGET_FUNCTION.evaluate(x);
-				var y:Number = this.evaluate(x);
-				totalDifference += Math.abs(yOpt - y);
-			}
-			if(isNaN(totalDifference) || totalDifference == Number.POSITIVE_INFINITY ){
-				this._fitness = Number.NEGATIVE_INFINITY;
-			}else{
-				this._fitness = -1* totalDifference;
-			}
+			//TODO
 			_fitnessComputed = true;
 		}
 		
@@ -140,9 +126,8 @@ package gp
 			return nodesWithRightSize[index];
 		}
 		
-		public function evaluate(x:Number):Number {
-			VariableTerminal.XVALUE = x;
-			return this.root.value;
+		public function evaluate():void {
+			this.root.evaluate;
 		}
 		
 		//generate randomly with half and half ramp
@@ -162,11 +147,8 @@ package gp
 		}
 		
 		public function getRandomTerminal():TTerminal {
-			if(Math.random() < .5){
-				return new EphemeralTerminal;
-			}else{
-				return new VariableTerminal;
-			}
+			var c:Class = this._terminalClasses[Math.floor(Math.random() * _terminalClasses.length)];
+			return new c;
 		}
 		
 		public function getRandomNode():TNode {

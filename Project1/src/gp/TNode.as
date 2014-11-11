@@ -2,8 +2,6 @@ package gp
 {
 	import flash.utils.*;
 	
-	import gp.terminals.EphemeralTerminal;
-	
 	public class TNode
 	{
 		
@@ -28,11 +26,7 @@ package gp
 		public function copy():TNode {
 			var nodeClass:Class = Class(getDefinitionByName(getQualifiedClassName(this)));
 			var newNode:TNode = new nodeClass as TNode;
-			if(nodeClass == EphemeralTerminal){
-				var t:EphemeralTerminal = this as EphemeralTerminal;
-				var n:EphemeralTerminal = newNode as EphemeralTerminal;
-				n.setValue(t.value);
-			}
+			
 			for(var i:uint; i < this.children.length; i++){
 				var child:TNode = this.children[i];
 				newNode.addChild(child.copy());
@@ -94,7 +88,7 @@ package gp
 			return _numChildren;
 		}
 		
-		public function get value():*{
+		public function get evaluate():*{
 			
 		}
 		
@@ -104,6 +98,14 @@ package gp
 		
 		public function toString():String {
 			return "empty";
+		}
+		
+		public function get indent():String {
+			var indent:String = "";
+			for(var i:uint = 0; i< this.depth; i++){
+				indent += " ";
+			}
+			return indent;
 		}
 	}
 }
