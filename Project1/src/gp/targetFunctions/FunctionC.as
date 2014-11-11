@@ -4,19 +4,19 @@ package gp.targetFunctions
 	
 	import gp.FuncionEvaluable;
 
-	public class FunctionA implements FuncionEvaluable
+	public class FunctionC implements FuncionEvaluable
 	{
-		public function FunctionA()
+		public function FunctionC()
 		{
-		}
-		
-		public function get heightInInterval():uint{
-			return 200;
 		}
 		
 		public function evaluate(x:Number):Number
 		{
-			return 1 + 3*Math.pow(x, 3) + 2*Math.pow(x,2) + x;
+			return 3*Math.sin(Math.pow(x,2)) + 3* Math.pow(x, 2) + 3*Math.cos(x/4)
+		}
+		
+		public function get heightInInterval():uint{
+			return 100;
 		}
 		
 		public function get label():String {
@@ -32,7 +32,7 @@ package gp.targetFunctions
 		}
 		
 		public function toString():String {
-			return "3x^3 + 2x^2 + x + 1";
+			return "3*sin(x^2) + 3x^2 + 3*cos(x/4)";
 		}
 	}
 }

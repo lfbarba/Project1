@@ -6,7 +6,10 @@ package ga
 	import flash.events.Event;
 	
 	import gp.FuncionEvaluable;
+	import gp.FunctionTree;
 	import gp.targetFunctions.FunctionA;
+	import gp.targetFunctions.FunctionB;
+	import gp.targetFunctions.FunctionC;
 
 	public class Parameters extends ParametersBase
 	{	
@@ -30,7 +33,7 @@ package ga
 			populationSizeSlideBar.maximum = 1000;
 			populationSizeSlideBar.snapInterval = 10;
 			this.populationSizeSlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
-			populationSizeSlideBar.value = 150;
+			populationSizeSlideBar.value = 200;
 			
 			
 			this.mutationProbabilitySlideBar.minimum = .0;
@@ -61,12 +64,14 @@ package ga
 			var targetFunction:Array = new Array;
 			targetFunction.push({label:"Select a function"});
 			targetFunction.push(new FunctionA);
+			targetFunction.push(new FunctionB);
+			targetFunction.push(new FunctionC);
 			targetFunctionComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			targetFunctionComboBox.dataProvider = new DataProvider(targetFunction);
 			
 			var crossoverOptions:Array = new Array;
-			crossoverOptions.push({label:"Subtree Swap Crossover", value: SubtreeSwapCrossover});
 			crossoverOptions.push({label:"Fair Subtree Swap Crossover", value: FairSubtreeSwapCrossover});
+			crossoverOptions.push({label:"Subtree Swap Crossover", value: SubtreeSwapCrossover});
 			crossoverComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			this.crossoverComboBox.dataProvider = new DataProvider(crossoverOptions);
 			
@@ -139,12 +144,15 @@ package ga
 			this.dispatchEvent(e);
 		}
 		
-		public function updateStatistics(max:Number, min:Number, avg:Number, best:Number, current:Number):void{
+		public function updateStatistics(max:Number, min:Number, avg:Number, best:Number, current:Number, bestFunction:FunctionTree):void{
 			this.maxFitness.text  = String(max);
 			this.minFitness.text = String(min);
 			this.avgFitness.text = String(avg);
 			this.bestFitness.text = String(best);
 			this.currentFitness.text = String(current);
+			if(bestFunction != null){
+				this.bestFunction.text = bestFunction.toString();
+			}
 		}
 	}
 }

@@ -44,12 +44,10 @@ package
 		
 		private var elitismNumber:uint = 10;
 				
-		private var progressExampleLayer:Sprite;
-		
 		private var visualLayer:Sprite;
 		
 		private var bestIndividual:FunctionTree;
-		private var bestFitness:Number =  - 100000;
+		private var bestFitness:Number = Number.NEGATIVE_INFINITY;
 		
 		private var startButton:Button;
 		private var stopButton:Button;
@@ -102,7 +100,7 @@ package
 				this.removeChild(_grapher);
 			}
 			_grapher = new Grapher(800, 600, -5, 5);
-			_grapher.drawBackground(200, 10);
+			_grapher.drawBackground(5, 1);
 			visualLayer.addChild(_grapher);
 		}
 		
@@ -113,6 +111,8 @@ package
 			this.selectionType = e.parameters.getSelectionType();
 			if(e.parameters.getTargetFunction() != null){
 				this._grapher.clearPlots();
+				var height:Number = e.parameters.getTargetFunction().heightInInterval;
+				_grapher.drawBackground(height, Math.floor(height / 10));
 				this._grapher.plotFunction(e.parameters.getTargetFunction(), 0xFF0000);
 				_targetFunction = e.parameters.getTargetFunction();
 			}else{
@@ -143,7 +143,7 @@ package
 				//
 				numGenerations++;
 			}
-			//t.start();
+			t.start();
 		}
 		
 		private function populationHasConverged():Boolean {
@@ -164,9 +164,6 @@ package
 		}
 		
 		private function showIndividual(p:FunctionTree):void {
-			if(progressExampleLayer != null && visualLayer.contains(progressExampleLayer)){
-				visualLayer.removeChild(progressExampleLayer);
-			}
 			if(bestIndividual != null && _targetFunction != null){
 				this._grapher.clearPlots();
 				this._grapher.plotFunction(_targetFunction, 0xFF0000);
@@ -180,13 +177,13 @@ package
 			var avg:Number = -1*this.mainPopulation.average;
 			var best:Number = -1* this.bestFitness;
 			var current:Number = -1* mainPopulation.getElement(0).fitness;
-			this.parameters.updateStatistics(Math.round(max), Math.round(min), Math.round(avg), Math.round(best), Math.round(current));
+			this.parameters.updateStatistics(Math.round(max), Math.round(min), 
+				Math.round(avg), Math.round(best), Math.round(current), this.bestIndividual);
 		}
 		
 
 		
 		private function runOneGeneration():void {
-			//crear mutaciones
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			mainPopulation.computePopulationFitness();
 			reportStatistics();
@@ -257,7 +254,7 @@ package
 			if(Math.random() < this.mutationProbability){
 				switch(this.parameters.getMutationType()){
 					case Parameters.SubTreeReplacementMutation:
-						//bs.subTreeReplacementMutation();
+						bs.subTreeReplacementMutation();
 						break;
 				}
 			}

@@ -29,6 +29,9 @@ package gp
 			}
 		}
 		
+		public function get heightInInterval():uint{
+			return 200;
+		}
 		
 		
 		public function get fitness():Number {
@@ -39,13 +42,16 @@ package gp
 		
 		private function computeFitness():void {
 			var totalDifference:Number = 0;
-			for(var x:Number = -5; x <= 5; x= x+.1){
+			for(var x:Number = -5; x <= 5; x= x+.5){
 				var yOpt:Number = GeneticProgram.TARGET_FUNCTION.evaluate(x);
 				var y:Number = this.evaluate(x);
 				totalDifference += Math.abs(yOpt - y);
 			}
-			this._fitness = -1* totalDifference;
-			trace(this, _fitness);
+			if(isNaN(totalDifference) || totalDifference == Number.POSITIVE_INFINITY ){
+				this._fitness = Number.NEGATIVE_INFINITY;
+			}else{
+				this._fitness = -1* totalDifference;
+			}
 			_fitnessComputed = true;
 		}
 		
@@ -53,9 +59,9 @@ package gp
 			var rn:TNode = this.chooseRandomNode();
 			var t:FunctionTree = new FunctionTree;
 			if(Math.random() < .5){
-				t.initializeRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), true);
+				t.initializeRandomly(Math.floor(Math.random()*1.1*rn.maxDepth), true);
 			}else{
-				t.initializeRandomly(Math.floor(Math.random()*3)*(this.maxDepth - rn.depth), false);
+				t.initializeRandomly(Math.floor(Math.random()*1.1*rn.maxDepth), false);
 			}
 			if(rn.depth > 0){
 				rn.parent.replaceChild(rn, t.root);
