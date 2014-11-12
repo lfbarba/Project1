@@ -13,7 +13,9 @@ package ants
 		
 		private var _pherormoneColor:Number = 0x0000FF;
 		
-		public static var dropInPherormonePerTick:Number = .1;
+		private var _pherormoneRadius:uint = 4;
+		
+		public static var dropInPherormonePerTick:Number = .01;
 		
 		public var simulator:Simulator;
 		
@@ -52,7 +54,9 @@ package ants
 		
 		
 		public function pherormoneChange(intensity:Number):void {
-			_pherormoneIntensity += intensity;
+			_pherormoneIntensity  += intensity;
+			_pherormoneIntensity = Math.min(1, _pherormoneIntensity);
+			
 		}
 		
 		public function get foodAmount():int {
@@ -64,7 +68,9 @@ package ants
 		}
 		
 		public function addFood():void {
-			_food++;
+			//if the food is drop in the nest it dissapears
+			if(simulator.nest != this)
+				_food++;
 		}
 		
 		//indicates that one unit of time has passed
@@ -76,13 +82,12 @@ package ants
 		}
 		
 		public function dropPherormone():void {
-			var radius:uint = 5;
 			for(var i:uint = 0; i < simulator.pixelWidth; i++){
 				for(var j:uint = 0; j < simulator.pixelHeight; j++){
 					var L1Dist:uint = Math.abs(i - coorX) + Math.abs(j - coorY);
-					if(L1Dist <= radius){
+					if(L1Dist <= _pherormoneRadius){
 						var pixel:GridPixel = simulator.getPixel(i, j);
-						pixel.pherormoneChange(1 - L1Dist/radius);
+						pixel.pherormoneChange(Math.pow(1 - L1Dist/_pherormoneRadius, 1));
 					}
 				}
 			}
@@ -99,7 +104,7 @@ package ants
 				_bkg.graphics.drawRect(0, 0, _size, _size);
 				_bkg.graphics.endFill();
 			}
-			_pherormoneIndicator.alpha = Math.min(1, this.pherormoneIntensity);
+			_pherormoneIndicator.alpha = Math.min(.8, this.pherormoneIntensity);
 		}
 		
 		public function draw():void {

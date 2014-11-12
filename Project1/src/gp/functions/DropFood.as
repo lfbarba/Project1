@@ -44,6 +44,7 @@ package gp.functions
 		}
 		
 		override public function toString():String {
+			setArgs();
 			return indent+"DropFood"+"\n"+ arg1.toString();
 		}
 	}

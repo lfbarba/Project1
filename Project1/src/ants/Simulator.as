@@ -39,7 +39,7 @@ package ants
 			//
 			this.graphic = withGraphics;
 			if(graphic){
-				t = new Timer(100, 0);
+				t = new Timer(10, 0);
 			}else{
 				t = new Timer(0, 0);
 			}
@@ -98,9 +98,13 @@ package ants
 			}
 		}
 		
-		public function getPixel(x:uint, y:uint):GridPixel {
-			x = (_pixelWidth + x) % _pixelWidth;
-			y = (_pixelHeight + y) % _pixelHeight;
+		public function getPixel(x:int, y:int):GridPixel {
+			/*x = Math.max(0, x);
+			x = Math.min(x, this._pixelWidth-1);
+			y = Math.max(0, y);
+			y = Math.min(y, this.pixelHeight-1);*/
+			x = (x + _pixelWidth) % _pixelWidth;
+			y = (y + pixelHeight) % pixelHeight;
 			return this._pixels[x][y];
 		}
 		

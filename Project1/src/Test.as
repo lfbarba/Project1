@@ -6,6 +6,7 @@ package
 	
 	import gp.FunctionTree;
 	import gp.functions.DropFood;
+	import gp.functions.DropPherormone;
 	import gp.functions.IfCarryingFood;
 	import gp.functions.IfFood;
 	import gp.functions.IfNest;
@@ -23,22 +24,27 @@ package
 			f.root = new IfCarryingFood;
 			var a:IfNest = new IfNest;
 			var d:DropFood = new DropFood;
-			d.addChild(new MoveRandomly);
+			d.addChild(new MoveToNest);
 			a.addChild(d);
-			a.addChild(new MoveToNest);
+			var h:DropPherormone = new DropPherormone;
+			h.addChild(new MoveToNest);
+			a.addChild(h);
 			f.root.addChild(a);
 			//
 			var b:IfFood = new IfFood;
 			var c:IfPherormone = new IfPherormone;
 			c.addChild(new MoveToPherormone);
 			c.addChild(new MoveRandomly);
+			b.addChild(c);
+			f.root.addChild(b);
+			trace(f);
 			
-			var s:Simulator = new Simulator(40, 40, 10, true);
+			var s:Simulator = new Simulator(40, 40, 100, true);
 			s.graphic = true;
 			s.dropPileOfFood(30, 10, 5);
 			s.dropPileOfFood(28, 14, 5);
 			s.dropPileOfFood(30, 30, 10);
-			s.setNest(5, 10);
+			s.setNest(15, 10);
 			s.draw();
 			s.setAntFunction(f);
 			this.addChild(s);

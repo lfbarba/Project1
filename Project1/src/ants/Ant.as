@@ -12,6 +12,7 @@ package ants
 		private var _hasFood:Boolean = false;
 		
 		private var _icon:Sprite;
+		private var _carryingIcon:Sprite;
 			
 		public function Ant()
 		{
@@ -21,6 +22,12 @@ package ants
 			_icon.graphics.drawCircle(-2, 0, 2);
 			_icon.graphics.drawCircle(2, 0, 2);
 			_icon.graphics.endFill();
+			
+			_carryingIcon = new Sprite;
+			_carryingIcon.graphics.beginFill(0xFFFF00);
+			_carryingIcon.graphics.drawCircle(-2, 0, 2);
+			_carryingIcon.graphics.drawCircle(2, 0, 2);
+			_carryingIcon.graphics.endFill();
 		}
 		
 		public static function get currentAnt():Ant {
@@ -60,20 +67,26 @@ package ants
 		public function moveToPherormone():void {
 			//scan adjacent nodes and move to the one with the most pherormones
 			var best:GridPixel;
-			var max:Number = currentPixel.pherormoneIntensity;
+			var somePixelWithPherormone:GridPixel;
+			var min:Number = Number.POSITIVE_INFINITY;
+			var posibilities:Array = new Array;
 			for(var i:int = -1; i <= 1; i++){
 				for(var j:int = -1; j <= 1; j++){
-					var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
-					if(pixel.pherormoneIntensity > max){
-						best = pixel;
-						max = pixel.pherormoneIntensity;
+					if((i == 0 || j == 0) && (i != 0 && j != 0)){
+						var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
+						if(pixel.pherormoneIntensity > .3){
+							best = pixel;
+							min = pixel.pherormoneIntensity;
+							posibilities.push(pixel);
+						}
 					}
 				}
 			}
-			if(best == null || best == currentPixel){
-				this.moveRandomly();
+			if(posibilities.length > 0){
+				var target:GridPixel = posibilities[Math.floor(Math.random() * posibilities.length)];
+				moveToPixel(target);
 			}else{
-				moveToPixel(best);
+				moveRandomly();
 			}
 		}
 		
@@ -82,15 +95,30 @@ package ants
 			if(currentPixel != nest){
 				var xIncrement:int;
 				var yIncrement:int;
-				xIncrement = (nest.x < currentPixel.coorX) ? -1 : 1;
-				yIncrement = (nest.y < currentPixel.coorY) ? -1 : 1;
+				xIncrement = (nest.coorX < currentPixel.coorX) ? -1 : 1;
+				xIncrement = (nest.coorX == currentPixel.coorX) ? 0 : xIncrement;
+				
+				yIncrement = (nest.coorY < currentPixel.coorY) ? -1 : 1;
+				yIncrement = (nest.coorY == currentPixel.coorY) ? 0 : yIncrement;
 				moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement));
 			}
 		}
 		
 		public function moveRandomly():void {
-			var xIncrement:int = (Math.random() - .5 < 0) ? -1 : 1;
-			var yIncrement:int = (Math.random() - .5 < 0) ? -1 : 1;
+			var rand:uint = Math.floor(Math.random() * 8);
+			var xIncrement:int;
+			var yIncrement:int;
+			switch(rand) {
+				case 0: xIncrement = 1; yIncrement = -1; break;
+				case 1: xIncrement = 1; yIncrement = 0; break;
+				case 2: xIncrement = 1; yIncrement = 1; break;
+				case 3: xIncrement = 0; yIncrement = -1; break;
+				case 4: xIncrement = 0; yIncrement = 1; break;
+				case 5: xIncrement = -1; yIncrement = -1; break;
+				case 6: xIncrement = -1; yIncrement = 0; break;
+				case 7: xIncrement = -1; yIncrement = 1; break;
+			}
+			
 			moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement)); 
 		}
 		
@@ -111,7 +139,16 @@ package ants
 		}
 		
 		public function get icon():Sprite {
-			return this._icon;
+			//steal the icons
+			var h:Sprite = new Sprite;
+			h.addChild(_icon);
+			h.addChild(_carryingIcon);
+			//
+			if(this.hasFood){
+				return _carryingIcon;
+			}else{
+				return this._icon;
+			}
 		}
 	}
 }
