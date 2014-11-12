@@ -27,7 +27,11 @@ package ants
 		
 		private var _totalFood:uint = 0;
 		
+		private var _foodRemaining:uint;
+		
 		private var _ants:Array;
+		
+		private var _numRounds:uint = 0;
 		
 		public function Simulator(w:uint, h:uint, numAnts:uint, withGraphics:Boolean = false)
 		{
@@ -55,6 +59,8 @@ package ants
 		}
 		
 		public function startSimulation():void {
+			_numRounds = 0;
+			_foodRemaining = _totalFood;
 			_ants = new Array;
 			for(var i:uint = i; i < this._numAnts; i++){
 				var a:Ant = new Ant;
@@ -62,6 +68,22 @@ package ants
 				a.moveToPixel(nest);
 			}
 			t.start();
+		}
+		
+		public function pauseSimulation():void {
+			if(t!= null){
+				t.stop();
+			}
+		}
+		
+		public function resumeSimulation():void {
+			if(t!= null){
+				t.start();
+			}
+		}
+		
+		public function foodReturned():void {
+			this._foodRemaining--;
 		}
 		
 		public function setAntFunction(f:FuncionEvaluable):void {
@@ -79,6 +101,9 @@ package ants
 			}
 			
 			this.dispatchEvent(new TickEvent(TickEvent.TICK_EVENT));
+			_numRounds ++;
+			if(_numRounds % 100 == 0)
+				trace("_numRounds", _numRounds, "totalFood", _totalFood, "foodRemaining", _foodRemaining);
 			t.start();
 		}
 		

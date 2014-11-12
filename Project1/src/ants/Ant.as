@@ -6,6 +6,7 @@ package ants
 	public class Ant
 	{
 		public var currentPixel:GridPixel;
+		private var _previousPixel:GridPixel;
 		
 		private static var _currentAnt:Ant;
 		
@@ -13,6 +14,7 @@ package ants
 		
 		private var _icon:Sprite;
 		private var _carryingIcon:Sprite;
+		private var _seinsingIcon:Sprite;
 			
 		public function Ant()
 		{
@@ -28,6 +30,16 @@ package ants
 			_carryingIcon.graphics.drawCircle(-2, 0, 2);
 			_carryingIcon.graphics.drawCircle(2, 0, 2);
 			_carryingIcon.graphics.endFill();
+			
+			_seinsingIcon = new Sprite;
+			_seinsingIcon.graphics.beginFill(0x00FF00);
+			_seinsingIcon.graphics.drawCircle(-2, 0, 2);
+			_seinsingIcon.graphics.drawCircle(2, 0, 2);
+			_seinsingIcon.graphics.endFill();
+		}
+		
+		public function get previousPixel():GridPixel {
+			return _previousPixel;
 		}
 		
 		public static function get currentAnt():Ant {
@@ -55,53 +67,74 @@ package ants
 			this._hasFood = false;
 		}
 		
+		private function moveTowardsPixel(pixel:GridPixel):void {
+			if(currentPixel != pixel){
+				var xIncrement:int;
+				var yIncrement:int;
+				xIncrement = (pixel.coorX < currentPixel.coorX) ? -1 : 1;
+				xIncrement = (pixel.coorX == currentPixel.coorX) ? 0 : xIncrement;
+				
+				yIncrement = (pixel.coorY < currentPixel.coorY) ? -1 : 1;
+				yIncrement = (pixel.coorY == currentPixel.coorY) ? 0 : yIncrement;
+				moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement));
+			}
+		}
+		
+		private function moveAgainstPixel(pixel:GridPixel):void {
+			if(currentPixel != pixel){
+				var xIncrement:int;
+				var yIncrement:int;
+				xIncrement = (pixel.coorX < currentPixel.coorX) ? 1 : -1;
+				xIncrement = (pixel.coorX == currentPixel.coorX) ? 0 : xIncrement;
+				
+				yIncrement = (pixel.coorY < currentPixel.coorY) ? 1 : -1;
+				yIncrement = (pixel.coorY == currentPixel.coorY) ? 0 : yIncrement;
+				moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement));
+			}
+		}
+		
 		public function moveToPixel(pixel:GridPixel):void {
+			_previousPixel = currentPixel;
 			currentPixel = pixel;
 			currentPixel.addAnt(this.icon);
 		}
 		
 		public function dropPherormone():void {
-			this.currentPixel.dropPherormone();
+			this.currentPixel.dropPherormone(this);
 		}
 		
 		public function moveToPherormone():void {
 			//scan adjacent nodes and move to the one with the most pherormones
-			var best:GridPixel;
-			var somePixelWithPherormone:GridPixel;
-			var min:Number = Number.POSITIVE_INFINITY;
-			var posibilities:Array = new Array;
-			for(var i:int = -1; i <= 1; i++){
-				for(var j:int = -1; j <= 1; j++){
-					if((i == 0 || j == 0) && (i != 0 && j != 0)){
+			if(currentPixel.gradient != null){
+				if(Math.random() < .8){
+					moveToPixel(currentPixel.gradient);
+				}else{
+					moveRandomly();
+				}
+			}else{
+				//move towards the hightst pherormone
+				var max:Number = currentPixel.pherormoneIntensity;
+				var best:GridPixel;
+				for(var i:int = -1; i <= 1; i++){
+					for(var j:int = -1; j <= 1; j++){
 						var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
-						if(pixel.pherormoneIntensity > .3){
+						if(pixel.pherormoneIntensity > max){
 							best = pixel;
-							min = pixel.pherormoneIntensity;
-							posibilities.push(pixel);
+							max = pixel.pherormoneIntensity;
 						}
 					}
 				}
-			}
-			if(posibilities.length > 0){
-				var target:GridPixel = posibilities[Math.floor(Math.random() * posibilities.length)];
-				moveToPixel(target);
-			}else{
-				moveRandomly();
+				if(best == null || best == currentPixel){
+					this.moveRandomly();
+				}else{
+					moveToPixel(best);
+				}
 			}
 		}
 		
 		public function moveToNest():void {
 			var nest:GridPixel = currentPixel.simulator.nest;
-			if(currentPixel != nest){
-				var xIncrement:int;
-				var yIncrement:int;
-				xIncrement = (nest.coorX < currentPixel.coorX) ? -1 : 1;
-				xIncrement = (nest.coorX == currentPixel.coorX) ? 0 : xIncrement;
-				
-				yIncrement = (nest.coorY < currentPixel.coorY) ? -1 : 1;
-				yIncrement = (nest.coorY == currentPixel.coorY) ? 0 : yIncrement;
-				moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement));
-			}
+			moveTowardsPixel(nest);
 		}
 		
 		public function moveRandomly():void {
@@ -118,7 +151,6 @@ package ants
 				case 6: xIncrement = -1; yIncrement = 0; break;
 				case 7: xIncrement = -1; yIncrement = 1; break;
 			}
-			
 			moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement)); 
 		}
 		
@@ -143,10 +175,13 @@ package ants
 			var h:Sprite = new Sprite;
 			h.addChild(_icon);
 			h.addChild(_carryingIcon);
+			h.addChild(_seinsingIcon);
 			//
 			if(this.hasFood){
 				return _carryingIcon;
-			}else{
+			}else if(this.pherormoneIntensityInLocation > 0){
+				return _seinsingIcon;
+			}else {
 				return this._icon;
 			}
 		}

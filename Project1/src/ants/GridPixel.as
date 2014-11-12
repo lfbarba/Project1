@@ -15,7 +15,7 @@ package ants
 		
 		private var _pherormoneRadius:uint = 4;
 		
-		public static var dropInPherormonePerTick:Number = .01;
+		public static var dropInPherormonePerTick:Number = .02;
 		
 		public var simulator:Simulator;
 		
@@ -29,6 +29,8 @@ package ants
 		
 		private var _i:uint;
 		private var _j:uint;
+		
+		private var _gradientPixel:GridPixel;
 		
 		public function GridPixel(s:uint, color:Number, sim:Simulator)
 		{
@@ -69,25 +71,45 @@ package ants
 		
 		public function addFood():void {
 			//if the food is drop in the nest it dissapears
-			if(simulator.nest != this)
+			if(simulator.nest != this){
 				_food++;
+			}else{
+				simulator.foodReturned();
+			}
 		}
 		
 		//indicates that one unit of time has passed
 		public function tickHandler(e:TickEvent):void {
 			_pherormoneIntensity = Math.max(0, _pherormoneIntensity - dropInPherormonePerTick);
+			if(_pherormoneIntensity  < .2)
+				this._gradientPixel = null;
 			if(this.simulator.graphic){
 				this.refresh();
 			}
 		}
 		
-		public function dropPherormone():void {
+		public function get gradient():GridPixel {
+			if(this.pherormoneIntensity > 0 && _gradientPixel!= null){
+				return _gradientPixel;
+			}else{
+				return null;
+			}
+		}
+		
+		public function dropPherormone(ant:Ant = null):void {
+			if(ant != null){
+				_gradientPixel = ant.previousPixel;
+			}
 			for(var i:uint = 0; i < simulator.pixelWidth; i++){
 				for(var j:uint = 0; j < simulator.pixelHeight; j++){
 					var L1Dist:uint = Math.abs(i - coorX) + Math.abs(j - coorY);
 					if(L1Dist <= _pherormoneRadius){
 						var pixel:GridPixel = simulator.getPixel(i, j);
-						pixel.pherormoneChange(Math.pow(1 - L1Dist/_pherormoneRadius, 1));
+						if(i ==0 && j ==0){	
+							pixel.pherormoneChange(1);
+						}else{
+							pixel.pherormoneChange(Math.pow((_pherormoneRadius -L1Dist)/_pherormoneRadius, 3));
+						}
 					}
 				}
 			}

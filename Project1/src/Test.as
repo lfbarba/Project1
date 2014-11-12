@@ -1,8 +1,12 @@
 package
 {
+	import ants.GridPixel;
 	import ants.Simulator;
 	
+	import fl.controls.Button;
+	
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	
 	import gp.FunctionTree;
 	import gp.functions.DropFood;
@@ -17,6 +21,8 @@ package
 	
 	public class Test extends Sprite
 	{
+		private var s:Simulator;
+		
 		public function Test()
 		{
 			super();
@@ -39,8 +45,9 @@ package
 			f.root.addChild(b);
 			trace(f);
 			
-			var s:Simulator = new Simulator(40, 40, 100, true);
+			s = new Simulator(40, 40, 100, true);
 			s.graphic = true;
+			GridPixel.dropInPherormonePerTick = .05;
 			s.dropPileOfFood(30, 10, 5);
 			s.dropPileOfFood(28, 14, 5);
 			s.dropPileOfFood(30, 30, 10);
@@ -48,6 +55,32 @@ package
 			s.draw();
 			s.setAntFunction(f);
 			this.addChild(s);
+			s.y = 20;
+			
+			var button:Button = new Button;
+			button.label = "Start";
+			button.addEventListener(MouseEvent.CLICK, this.start);
+			this.addChild(button);
+			
+			var pause:Button = new Button;
+			pause.label = "Pause";
+			pause.addEventListener(MouseEvent.CLICK, pauseHandler);
+			this.addChild(pause);
+			pause.x = 200;
+		}
+		
+		private var _paused:Boolean = false;
+		private function pauseHandler(e:MouseEvent):void {
+			if(_paused == false){
+				s.pauseSimulation();
+				_paused = true;
+			}else{
+				s.resumeSimulation();
+				_paused = false;
+			}
+		}
+		
+		private function start(e:MouseEvent):void {
 			s.startSimulation();
 		}
 	}
