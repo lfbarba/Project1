@@ -131,13 +131,15 @@ package ants
 		}
 		
 		public function refresh():void {
-			_foodIndicator.alpha = Math.min(1, foodAmount / 3);
-			if(this.simulator.nest == this){
-				_bkg.graphics.beginFill(0x444444);
-				_bkg.graphics.drawRect(0, 0, _size, _size);
-				_bkg.graphics.endFill();
+			if(simulator.graphic){
+				_foodIndicator.alpha = Math.min(1, foodAmount / 3);
+				if(this.simulator.nest == this){
+					_bkg.graphics.beginFill(0x444444);
+					_bkg.graphics.drawRect(0, 0, _size, _size);
+					_bkg.graphics.endFill();
+				}
+				_pherormoneIndicator.alpha = Math.min(.8, this.pherormoneIntensity);
 			}
-			_pherormoneIndicator.alpha = Math.min(.8, this.pherormoneIntensity);
 		}
 		
 		public function draw():void {
@@ -173,7 +175,8 @@ package ants
 		
 		public function addAnt(a:Sprite):void {
 			a.x =  a.y = _size/2;
-			this._antLayer.addChild(a);
+			if(this.simulator.graphic)
+				_antLayer.addChild(a);
 		}
 		
 		public function removeAnt(a:Sprite):void {

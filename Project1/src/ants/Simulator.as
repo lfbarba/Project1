@@ -17,7 +17,7 @@ package ants
 		
 		public var nest:GridPixel;
 		
-		public var graphic:Boolean = false;
+		private var _graphic:Boolean = false;
 		
 		private var t:Timer;
 		
@@ -33,22 +33,31 @@ package ants
 		
 		private var _numRounds:uint = 0;
 		
-		public function Simulator(w:uint, h:uint, numAnts:uint, withGraphics:Boolean = false)
+		private var _maxNumRounds:int;
+		
+		public function Simulator(w:uint, h:uint, withGraphics:Boolean = true, maxNumRounds:int = -1)
 		{
 			super();
-			this.doubleClickEnabled = true;
 			_pixelWidth = w;
 			_pixelHeight = h;
-			_numAnts = numAnts;
 			setUpPlayGround();
+			_maxNumRounds = maxNumRounds;
 			//
-			this.graphic = withGraphics;
-			if(graphic){
+			this._graphic = withGraphics;
+			if(_graphic){
 				t = new Timer(10, 0);
 			}else{
 				t = new Timer(0, 0);
 			}
 			t.addEventListener(TimerEvent.TIMER, runRoundOfSimulation);
+		}
+		
+		public function get graphic():Boolean {
+			return _graphic;
+		}
+		
+		public function set graphic(b:Boolean):void {
+			this._graphic = b;
 		}
 		
 		public function set numAnts(n:uint):void {
@@ -116,7 +125,7 @@ package ants
 			_antFunction = f;
 		}
 		
-		public function runRoundOfSimulation(e:TimerEvent):void {
+		public function runRoundOfSimulation(e:TimerEvent = null):void {
 			if(_antFunction == null)
 				throw new Error("No Ant Function defined");
 			t.stop();
@@ -130,8 +139,23 @@ package ants
 			_numRounds ++;
 			if(_numRounds % 100 == 0)
 				trace("_numRounds", _numRounds, "totalFood", _totalFood, "foodRemaining", _foodRemaining);
-			t.start();
+			if(_numRounds != _maxNumRounds){
+				t.start();
+			}else{
+				trace("maxNumRounds", _maxNumRounds, "achieved");
+			}
+			
 		}
+		
+		public function get totalFood():uint {
+			return _totalFood;
+		}
+		
+		public function get foodRemaining():uint {
+			return _foodRemaining;
+		}
+		
+		
 		
 		public function setNest(x:uint, y:uint):void {
 			nest = this.getPixel(x, y);
@@ -150,10 +174,6 @@ package ants
 		}
 		
 		public function getPixel(x:int, y:int):GridPixel {
-			/*x = Math.max(0, x);
-			x = Math.min(x, this._pixelWidth-1);
-			y = Math.max(0, y);
-			y = Math.min(y, this.pixelHeight-1);*/
 			x = (x + _pixelWidth) % _pixelWidth;
 			y = (y + pixelHeight) % pixelHeight;
 			return this._pixels[x][y];
@@ -176,10 +196,12 @@ package ants
 		}
 		
 		public function refreshPixel():void {
-			for(var i:uint = 0; i < _pixelWidth; i++){
-				for(var j:uint = 0; j < _pixelHeight; j++){
-					var pixel:GridPixel = _pixels[i][j] as GridPixel;
-					pixel.refresh();
+			if(this.graphic){
+				for(var i:uint = 0; i < _pixelWidth; i++){
+					for(var j:uint = 0; j < _pixelHeight; j++){
+						var pixel:GridPixel = _pixels[i][j] as GridPixel;
+						pixel.refresh();
+					}
 				}
 			}
 		}

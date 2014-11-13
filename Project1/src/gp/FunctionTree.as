@@ -1,5 +1,8 @@
 package gp
 {
+	import ants.GridPixel;
+	import ants.Simulator;
+	
 	import flash.media.Camera;
 	import flash.utils.*;
 	
@@ -37,7 +40,15 @@ package gp
 		}
 		
 		private function computeFitness():void {
-			//TODO
+			var s:Simulator = new Simulator(20, 20, false, 100);
+			s.dropPileOfFood(10, 15, 5);
+			s.setNest(10, 10);
+			s.numAnts = 100;
+			GridPixel.dropInPherormonePerTick = .05;
+			s.setAntFunction(this);
+			s.changeTickTime(0);
+			s.startSimulation();
+			
 			_fitnessComputed = true;
 		}
 		

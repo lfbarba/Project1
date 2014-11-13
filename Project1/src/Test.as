@@ -47,14 +47,14 @@ package
 			f.root.addChild(b);
 			trace(f);
 			
-			s = new Simulator(40, 40, 100, true);
-			s.changeTickTime(100);
-			s.graphic = true;
-			s.setNest(15, 10);
-			s.draw();
+			s = new Simulator(40, 40, false, 120);
+			
+			s.setNest(15, 20);
+			//s.draw();
 			s.setAntFunction(f);
 			this.addChild(s);
 			s.y = 20;
+			s.dropPileOfFood(30, 30, 7);
 			
 			var button:Button = new Button;
 			button.label = "Start";
@@ -84,6 +84,7 @@ package
 			p.numAntsText.text = String(p.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = p.dropPherormonesSlider.value;
 			GridPixel.dropFoodRadiusOnDoubleClick = p.amountFoodSlider.value;
+			//s.changeTickTime(0);
 		}
 		
 		private var _paused:Boolean = false;
