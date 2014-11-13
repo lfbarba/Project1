@@ -1,6 +1,7 @@
 package ants
 {
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	
 	public class GridPixel extends Sprite
 	{
@@ -17,6 +18,8 @@ package ants
 		
 		public static var dropInPherormonePerTick:Number = .02;
 		
+		public static var dropFoodRadiusOnDoubleClick:uint = 5;
+		
 		public var simulator:Simulator;
 		
 		private var _food:uint = 0;
@@ -32,6 +35,7 @@ package ants
 		
 		private var _gradientPixel:GridPixel;
 		
+		
 		public function GridPixel(s:uint, color:Number, sim:Simulator)
 		{
 			super();
@@ -39,6 +43,13 @@ package ants
 			this._size = s;
 			_bkgColor = color;
 			sim.addEventListener(TickEvent.TICK_EVENT, tickHandler);
+			this.doubleClickEnabled = true;
+			this.addEventListener(MouseEvent.CLICK, doubleClickHandler);
+		}
+		
+		private function doubleClickHandler(e:MouseEvent):void {
+			simulator.dropPileOfFood(coorX, coorY, dropFoodRadiusOnDoubleClick);
+			simulator.refreshPixel();
 		}
 		
 		public function setCoordinates(i:uint, j:uint):void {
@@ -119,7 +130,7 @@ package ants
 			return _pherormoneIntensity;
 		}
 		
-		private function refresh():void {
+		public function refresh():void {
 			_foodIndicator.alpha = Math.min(1, foodAmount / 3);
 			if(this.simulator.nest == this){
 				_bkg.graphics.beginFill(0x444444);
@@ -163,6 +174,11 @@ package ants
 		public function addAnt(a:Sprite):void {
 			a.x =  a.y = _size/2;
 			this._antLayer.addChild(a);
+		}
+		
+		public function removeAnt(a:Sprite):void {
+			if(_antLayer.contains(a))
+				this._antLayer.removeChild(a);
 		}
 	}
 }

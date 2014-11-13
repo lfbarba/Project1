@@ -4,6 +4,7 @@ package
 	import ants.Simulator;
 	
 	import fl.controls.Button;
+	import fl.events.SliderEvent;
 	
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
@@ -22,6 +23,7 @@ package
 	public class Test extends Sprite
 	{
 		private var s:Simulator;
+		private var p:SimulationParameters;
 		
 		public function Test()
 		{
@@ -46,11 +48,8 @@ package
 			trace(f);
 			
 			s = new Simulator(40, 40, 100, true);
+			s.changeTickTime(100);
 			s.graphic = true;
-			GridPixel.dropInPherormonePerTick = .05;
-			s.dropPileOfFood(30, 10, 5);
-			s.dropPileOfFood(28, 14, 5);
-			s.dropPileOfFood(30, 30, 10);
 			s.setNest(15, 10);
 			s.draw();
 			s.setAntFunction(f);
@@ -67,6 +66,24 @@ package
 			pause.addEventListener(MouseEvent.CLICK, pauseHandler);
 			this.addChild(pause);
 			pause.x = 200;
+			
+			p = new SimulationParameters;
+			this.addChild(p);
+			p.x = 660;
+			p.tickTimeSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
+			p.numAntsSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
+			p.amountFoodSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
+			p.dropPherormonesSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
+			//
+			parametersChanged();
+		}
+		
+		private function parametersChanged(e:SliderEvent = null):void {
+			s.changeTickTime(p.tickTimeSlider.value);
+			s.numAnts = p.numAntsSlider.value;
+			p.numAntsText.text = String(p.numAntsSlider.value);
+			GridPixel.dropInPherormonePerTick = p.dropPherormonesSlider.value;
+			GridPixel.dropFoodRadiusOnDoubleClick = p.amountFoodSlider.value;
 		}
 		
 		private var _paused:Boolean = false;

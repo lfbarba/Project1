@@ -36,6 +36,7 @@ package ants
 		public function Simulator(w:uint, h:uint, numAnts:uint, withGraphics:Boolean = false)
 		{
 			super();
+			this.doubleClickEnabled = true;
 			_pixelWidth = w;
 			_pixelHeight = h;
 			_numAnts = numAnts;
@@ -50,6 +51,31 @@ package ants
 			t.addEventListener(TimerEvent.TIMER, runRoundOfSimulation);
 		}
 		
+		public function set numAnts(n:uint):void {
+			_numAnts = n;
+			if(_ants == null)
+				return;
+			var a:Ant;
+			if(_numAnts > _ants.length){
+				for(var i:uint = _ants.length; i < _numAnts; i++){
+					a = new Ant;
+					this._ants.push(a);
+					a.moveToPixel(nest);
+				}
+			}else{
+				while(_numAnts < _ants.length){
+					a = _ants.pop();
+					a.icon.x = a.icon.y = -20;
+					this.addChild(a.icon);
+				}
+			}
+			this.refreshPixel();
+		}
+		
+		public function changeTickTime(time:uint):void {
+			t.delay = time;
+		}
+		
 		public function get pixelWidth():uint {
 			return _pixelWidth;
 		}
@@ -62,7 +88,7 @@ package ants
 			_numRounds = 0;
 			_foodRemaining = _totalFood;
 			_ants = new Array;
-			for(var i:uint = i; i < this._numAnts; i++){
+			for(var i:uint = 0; i < this._numAnts; i++){
 				var a:Ant = new Ant;
 				this._ants.push(a);
 				a.moveToPixel(nest);
@@ -145,6 +171,15 @@ package ants
 					pixel.x = i* _pixelSize;
 					pixel.y = j * _pixelSize;
 					_pixels[i][j] = pixel;
+				}
+			}
+		}
+		
+		public function refreshPixel():void {
+			for(var i:uint = 0; i < _pixelWidth; i++){
+				for(var j:uint = 0; j < _pixelHeight; j++){
+					var pixel:GridPixel = _pixels[i][j] as GridPixel;
+					pixel.refresh();
 				}
 			}
 		}
