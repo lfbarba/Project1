@@ -126,8 +126,8 @@ package ga
 			
 			for(var i:uint = 0; i< population.length; i++){
 				var bs:FunctionTree = population[i] as FunctionTree;
-				if(bs.maxDepth > 20){
-					bs.initializeRandomly(5, true);
+				if(bs.maxDepth > 7){
+					bs.initializeRandomly(4, true);
 				}
 				sum += bs.fitness;
 				max = Math.max(bs.fitness, max);

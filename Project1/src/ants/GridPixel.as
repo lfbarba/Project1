@@ -111,16 +111,16 @@ package ants
 			if(ant != null){
 				_gradientPixel = ant.previousPixel;
 			}
-			for(var i:uint = 0; i < simulator.pixelWidth; i++){
-				for(var j:uint = 0; j < simulator.pixelHeight; j++){
-					var L1Dist:uint = Math.abs(i - coorX) + Math.abs(j - coorY);
-					if(L1Dist <= _pherormoneRadius){
-						var pixel:GridPixel = simulator.getPixel(i, j);
-						if(i ==0 && j ==0){	
-							pixel.pherormoneChange(1);
-						}else{
-							pixel.pherormoneChange(Math.pow((_pherormoneRadius -L1Dist)/_pherormoneRadius, 3));
-						}
+			for(var i:int = -_pherormoneRadius; i <= _pherormoneRadius; i++){
+				var j1:int = -(_pherormoneRadius - Math.abs(i));
+				var j2:int = _pherormoneRadius - Math.abs(i);
+				for(var j:int = j1; j <= j2; j++){
+					var pixel:GridPixel = simulator.getPixel(coorX + i, coorY + j);
+					var L1Dist:uint = Math.abs(i) + Math.abs(j);
+					if(i ==0 && j ==0){	
+						pixel.pherormoneChange(1);
+					}else{
+						pixel.pherormoneChange(Math.pow((_pherormoneRadius -L1Dist)/_pherormoneRadius, 3));
 					}
 				}
 			}

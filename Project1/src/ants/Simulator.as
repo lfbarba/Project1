@@ -93,7 +93,8 @@ package ants
 			return _pixelHeight;
 		}
 		
-		public function startSimulation():void {
+		public function startSimulation():Number {
+			_paused = false;
 			_numRounds = 0;
 			_foodRemaining = _totalFood;
 			_ants = new Array;
@@ -102,18 +103,26 @@ package ants
 				this._ants.push(a);
 				a.moveToPixel(nest);
 			}
-			t.start();
-		}
-		
-		public function pauseSimulation():void {
-			if(t!= null){
-				t.stop();
+			if(this._graphic){
+				t.start();
+				return -1;
+			}else{
+				runRoundOfSimulation();
+				return (_totalFood - _foodRemaining) / this._totalFood;
 			}
 		}
 		
-		public function resumeSimulation():void {
+		private var _paused:Boolean = true;
+		
+		public function pauseResumeSimulation():void {
 			if(t!= null){
-				t.start();
+				if(_paused){
+					t.start();
+					_paused = false;
+				}else{
+					t.stop();
+					_paused = true;
+				}
 			}
 		}
 		
@@ -137,12 +146,14 @@ package ants
 			
 			this.dispatchEvent(new TickEvent(TickEvent.TICK_EVENT));
 			_numRounds ++;
-			if(_numRounds % 100 == 0)
+			if(_numRounds % 50 == 0)
 				trace("_numRounds", _numRounds, "totalFood", _totalFood, "foodRemaining", _foodRemaining);
 			if(_numRounds != _maxNumRounds){
-				t.start();
-			}else{
-				trace("maxNumRounds", _maxNumRounds, "achieved");
+				if(this.graphic){
+					t.start();
+				}else{
+					runRoundOfSimulation();
+				}
 			}
 			
 		}
@@ -174,8 +185,12 @@ package ants
 		}
 		
 		public function getPixel(x:int, y:int):GridPixel {
-			x = (x + _pixelWidth) % _pixelWidth;
-			y = (y + pixelHeight) % pixelHeight;
+			//x = (x + _pixelWidth) % _pixelWidth;
+			//y = (y + pixelHeight) % pixelHeight;
+			x = Math.min(this.pixelWidth -1 , x);
+			y = Math.min(this.pixelHeight -1 , y);
+			x = Math.max(0, x);
+			y = Math.max(0, y);
 			return this._pixels[x][y];
 		}
 		

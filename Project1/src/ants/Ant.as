@@ -1,6 +1,7 @@
 package ants
 {
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.geom.Point;
 	
 	public class Ant
@@ -54,7 +55,7 @@ package ants
 		}
 		
 		public function pickFood():void {
-			if(this.currentPixel.foodAmount > 0){
+			if(this.currentPixel.foodAmount > 0 && _hasFood == false ){
 				this.currentPixel.removeFood();
 				this._hasFood = true;
 			}
@@ -80,16 +81,23 @@ package ants
 			}
 		}
 		
-		private function moveAgainstPixel(pixel:GridPixel):void {
-			if(currentPixel != pixel){
-				var xIncrement:int;
-				var yIncrement:int;
-				xIncrement = (pixel.coorX < currentPixel.coorX) ? 1 : -1;
-				xIncrement = (pixel.coorX == currentPixel.coorX) ? 0 : xIncrement;
-				
-				yIncrement = (pixel.coorY < currentPixel.coorY) ? 1 : -1;
-				yIncrement = (pixel.coorY == currentPixel.coorY) ? 0 : yIncrement;
-				moveToPixel(currentPixel.simulator.getPixel(currentPixel.coorX + xIncrement, currentPixel.coorY + yIncrement));
+		private function moveRandomlyAwayFromNestPixel():void {
+			var candidates:Array = new Array;
+			var nest:GridPixel = currentPixel.simulator.nest;
+			var L1toNest:uint = Math.pow(nest.coorX - currentPixel.coorX, 2) + Math.pow(nest.coorY - currentPixel.coorY, 2);
+			for(var i:int = -1; i <= 1; i++){
+				for(var j:int = -1; j <= 1; j++){
+					var distToNest:uint = Math.pow(nest.coorX - currentPixel.coorX - i, 2) + Math.pow(nest.coorY - currentPixel.coorY - j, 2);
+					var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
+					if(i != 0 && j != 0 && distToNest > L1toNest){
+						candidates.push(pixel);
+					}
+				}
+			}
+			if(candidates.length  != 0){
+				this.moveToPixel(candidates[Math.floor(Math.random() * candidates.length)]);
+			}else{
+				this.moveRandomly();
 			}
 		}
 		
@@ -104,37 +112,26 @@ package ants
 		}
 		
 		public function moveToPherormone():void {
-			//scan adjacent nodes and move to the one with the most pherormones
-			if(currentPixel.gradient != null){
-				if(Math.random() < .8){
-					moveToPixel(currentPixel.gradient);
+			if(currentPixel.pherormoneIntensity > 0){
+				//move to the highest pherormone node that is farther than you from the nest
+				if(currentPixel.gradient != null){
+					if(Math.random() < .7){
+						moveToPixel(currentPixel.gradient);
+					}else{
+						this.moveRandomlyAwayFromNestPixel();
+					}
 				}else{
-					moveRandomly();
+					this.moveRandomlyAwayFromNestPixel();
 				}
 			}else{
-				//move towards the hightst pherormone
-				var max:Number = currentPixel.pherormoneIntensity;
-				var best:GridPixel;
-				for(var i:int = -1; i <= 1; i++){
-					for(var j:int = -1; j <= 1; j++){
-						var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
-						if(pixel.pherormoneIntensity > max){
-							best = pixel;
-							max = pixel.pherormoneIntensity;
-						}
-					}
-				}
-				if(best == null || best == currentPixel){
-					this.moveRandomly();
-				}else{
-					moveToPixel(best);
-				}
+				this.moveRandomly();
 			}
 		}
 		
 		public function moveToNest():void {
 			var nest:GridPixel = currentPixel.simulator.nest;
 			moveTowardsPixel(nest);
+			this.dropPherormone();
 		}
 		
 		public function moveRandomly():void {
@@ -176,6 +173,9 @@ package ants
 			h.addChild(_icon);
 			h.addChild(_carryingIcon);
 			h.addChild(_seinsingIcon);
+			h.x = h.y = -20;
+			h.visible = false;
+			this.currentPixel.simulator.addChild(h);
 			//
 			if(this.hasFood){
 				return _carryingIcon;

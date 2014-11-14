@@ -103,7 +103,7 @@ package gp
 		public function get indent():String {
 			var indent:String = "";
 			for(var i:uint = 0; i< this.depth; i++){
-				indent += " ";
+				indent += "   ";
 			}
 			return indent;
 		}

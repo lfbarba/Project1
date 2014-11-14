@@ -1,6 +1,10 @@
 package
 {
+	import ants.GridPixel;
+	import ants.Simulator;
+	
 	import fl.controls.Button;
+	import fl.events.SliderEvent;
 	
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -15,8 +19,16 @@ package
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
+	import gp.functions.DropFood;
+	import gp.functions.DropPherormone;
+	import gp.functions.IfCarryingFood;
+	import gp.functions.IfFood;
+	import gp.functions.IfNest;
+	import gp.functions.IfPherormone;
+	import gp.terminals.MoveRandomly;
+	import gp.terminals.MoveToNest;
+	import gp.terminals.MoveToPherormone;
 	
-	import grapher.Grapher;
 	
 	public class GeneticProgram extends Sprite
 	{
@@ -25,15 +37,15 @@ package
 		private var mainPopulation:Population;
 		
 		private var populationSize:uint;
-		private var initialDepthOfSubtrees:uint = 5;
+		private var initialDepthOfSubtrees:uint = 4;
 		
 		private var mutationProbability:Number;
 		private var crossOverProbability:Number;
 		
 		
-		private var convergenceTreshhold:Number = .000001;
+		private var convergenceTreshhold:Number = .01;
 		
-		private var maxNumGenerations:uint = 1000;
+		private var maxNumGenerations:uint = 20;
 		public static var numGenerations:uint = 0;
 		
 		
@@ -55,8 +67,9 @@ package
 		
 		private var counter:uint = 0;
 		
-		private var _grapher:Grapher;
-		private static var _targetFunction:FuncionEvaluable;
+		private var _simulator:Simulator;
+		
+		private var _simulatorParameters:SimulationParameters; 
 		
 		
 		public function GeneticProgram()
@@ -79,7 +92,7 @@ package
 			startButton.addEventListener(MouseEvent.CLICK, this.startGeneticAlgorithm);
 			stopButton.addEventListener(MouseEvent.CLICK, this.stopProcess);
 			//
-			setUpGrapher();
+			setUpSimulator();
 			//
 			parameters = new Parameters;
 			parameters.x = this.stage.stageWidth;
@@ -88,17 +101,82 @@ package
 			this.addChild(parameters);
 		}
 		
-		public static function get TARGET_FUNCTION():FuncionEvaluable {
-			return _targetFunction;
+		private function get optimalFunction():FuncionEvaluable {
+			var f:FunctionTree = new FunctionTree;
+			f.root = new IfCarryingFood;
+			var a:IfNest = new IfNest;
+			var d:DropFood = new DropFood;
+			d.addChild(new MoveToNest);
+			a.addChild(d);
+			var h:DropPherormone = new DropPherormone;
+			h.addChild(new MoveToNest);
+			a.addChild(h);
+			f.root.addChild(a);
+			//
+			var b:IfFood = new IfFood;
+			/*var c:IfPherormone = new IfPherormone;
+			c.addChild(new MoveToPherormone);
+			c.addChild(new MoveRandomly);
+			b.addChild(c);*/
+			b.addChild(new MoveRandomly);
+			f.root.addChild(b);
+			return f;
 		}
 		
-		private function setUpGrapher():void {
-			if(_grapher != null && this.contains(_grapher)){
-				this.removeChild(_grapher);
-			}
-			_grapher = new Grapher(800, 600, -5, 5);
-			_grapher.drawBackground(5, 1);
-			visualLayer.addChild(_grapher);
+		private function setUpSimulator():void {
+			_simulator = new Simulator(16, 2, true, -1);
+			_simulator.changeTickTime(200);
+			_simulator.dropPileOfFood(0, 1, 2);
+			_simulator.dropPileOfFood(16, 1, 2);
+			_simulator.setNest(8, 1);
+			_simulator.numAnts = 40;
+			GridPixel.dropInPherormonePerTick = .01;
+			_simulator.draw();
+			this.addChild(_simulator);
+			_simulator.y = 100;
+			_simulator.x = 20;
+			
+			var button:Button = new Button;
+			button.label = "Simulation Start";
+			button.addEventListener(MouseEvent.CLICK, this.startSimulation);
+			button.x = 110;
+			button.y = 80;
+			this.addChild(button);
+			
+			var pause:Button = new Button;
+			pause.label = "Simulation Pause";
+			pause.addEventListener(MouseEvent.CLICK, pauseResumeSimulator);
+			this.addChild(pause);
+			pause.x = 310;
+			pause.y = 80;
+			
+			/*_simulatorParameters = new SimulationParameters;
+			this.addChild(_simulatorParameters);
+			_simulatorParameters.x = 660;
+			_simulatorParameters.tickTimeSlider.addEventListener(SliderEvent.CHANGE, simulatorParametersChanged);
+			_simulatorParameters.numAntsSlider.addEventListener(SliderEvent.CHANGE, simulatorParametersChanged);
+			_simulatorParameters.amountFoodSlider.addEventListener(SliderEvent.CHANGE, simulatorParametersChanged);
+			_simulatorParameters.dropPherormonesSlider.addEventListener(SliderEvent.CHANGE, simulatorParametersChanged);
+			//
+			simulatorParametersChanged();*/
+			
+			_simulator.setAntFunction(optimalFunction);
+		}
+
+		private function simulatorParametersChanged(e:SliderEvent = null):void {
+			_simulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
+			_simulator.numAnts = _simulatorParameters.numAntsSlider.value;
+			_simulatorParameters.numAntsText.text = String(_simulatorParameters.numAntsSlider.value);
+			GridPixel.dropInPherormonePerTick = _simulatorParameters.dropPherormonesSlider.value;
+			GridPixel.dropFoodRadiusOnDoubleClick = _simulatorParameters.amountFoodSlider.value;
+		}
+		
+		private function pauseResumeSimulator(e:MouseEvent):void {
+			_simulator.pauseResumeSimulation();
+		}
+		
+		private function startSimulation(e:MouseEvent):void {
+			_simulator.startSimulation();
 		}
 		
 		private function parametersChangeHandler(e:ParametersChangeEvent):void {
@@ -106,16 +184,6 @@ package
 			this.crossOverProbability = e.parameters.getCrossoverProbability();
 			this.mutationProbability = e.parameters.getMutationProbability();
 			this.selectionType = e.parameters.getSelectionType();
-			if(e.parameters.getTargetFunction() != null){
-				this._grapher.clearPlots();
-				var height:Number = e.parameters.getTargetFunction().heightInInterval;
-				_grapher.drawBackground(height, Math.floor(height / 10));
-				this._grapher.plotFunction(e.parameters.getTargetFunction(), 0xFF0000);
-				_targetFunction = e.parameters.getTargetFunction();
-			}else{
-				this._grapher.clearPlots();
-				_targetFunction = null;
-			}
 		}
 		
 		private function startGeneticAlgorithm(e:MouseEvent):void {
@@ -138,12 +206,17 @@ package
 				this.parameters.updateNumGenerations(numGenerations);
 				runOneGeneration();
 				//
-				numGenerations++;
+				if(maxNumGenerations != numGenerations){
+					numGenerations++;
+					t.start();
+				}else{
+					trace("Max num of generations achieved");
+				}
 			}
-			t.start();
 		}
 		
 		private function populationHasConverged():Boolean {
+			return false;
 			if(this.mainPopulation.maximum - this.mainPopulation.average < this.convergenceTreshhold &&
 				this.mainPopulation.average - this.mainPopulation.minimum < this.convergenceTreshhold ){
 				trace("Convergence achieved");
@@ -161,21 +234,19 @@ package
 		}
 		
 		private function showIndividual(p:FunctionTree):void {
-			if(bestIndividual != null && _targetFunction != null){
-				this._grapher.clearPlots();
-				this._grapher.plotFunction(_targetFunction, 0xFF0000);
-				this._grapher.plotFunction(bestIndividual);
+			if(bestIndividual != null){
+				_simulator.setAntFunction(bestIndividual);
 			}
 		}
 		
 		private function reportStatistics():void {
-			var max:Number = -1*this.mainPopulation.maximum;
-			var min:Number = -1* this.mainPopulation.minimum;
-			var avg:Number = -1*this.mainPopulation.average;
-			var best:Number = -1* this.bestFitness;
-			var current:Number = -1* mainPopulation.getElement(0).fitness;
-			this.parameters.updateStatistics(Math.round(max), Math.round(min), 
-				Math.round(avg), Math.round(best), Math.round(current), this.bestIndividual);
+			var max:Number = this.mainPopulation.maximum;
+			var min:Number =  this.mainPopulation.minimum;
+			var avg:Number = this.mainPopulation.average;
+			var best:Number =  this.bestFitness;
+			var current:Number =  mainPopulation.getElement(0).fitness;
+			this.parameters.updateStatistics(max, min, 
+				avg, best, current, this.bestIndividual);
 		}
 		
 
@@ -256,8 +327,6 @@ package
 				}
 			}
 		}
-		
-		
 		
 		private function createPopulation():void {
 			var repetition:Array = new Array;

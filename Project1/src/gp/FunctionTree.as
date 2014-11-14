@@ -20,16 +20,12 @@ package gp
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
 
-			_functionsClasses = new Array(IfCarryingFood, IfFood, IfNest, IfPherormone);
-			_terminalClasses = new Array(DropFood, DropPherormone, MoveRandomly, MoveToNest, MoveToPherormone);
+			_functionsClasses = new Array(IfCarryingFood, IfFood, IfNest, IfPherormone, DropFood);
+			_terminalClasses = new Array(MoveRandomly, MoveToNest, MoveToPherormone);
 			
 			if(copyFrom != null){
 				this.root = copyFrom.root.copy();
 			}
-		}
-		
-		public function get heightInInterval():uint{
-			return 200;
 		}
 		
 		
@@ -40,14 +36,15 @@ package gp
 		}
 		
 		private function computeFitness():void {
-			var s:Simulator = new Simulator(20, 20, false, 100);
-			s.dropPileOfFood(10, 15, 5);
-			s.setNest(10, 10);
-			s.numAnts = 100;
-			GridPixel.dropInPherormonePerTick = .05;
+			var s:Simulator = new Simulator(16, 2, false, 40);
+			s.dropPileOfFood(0, 1, 2);
+			s.dropPileOfFood(16, 1, 2);
+			s.setNest(8, 1);
+			s.numAnts = 40;
+			GridPixel.dropInPherormonePerTick = .01;
 			s.setAntFunction(this);
 			s.changeTickTime(0);
-			s.startSimulation();
+			this._fitness = s.startSimulation();
 			
 			_fitnessComputed = true;
 		}
