@@ -23,36 +23,18 @@ package
 	
 	public class Test extends Sprite
 	{
-		private var s:Simulator;
+		private var _simulator:Simulator;
 		private var p:SimulationParameters;
 		
 		public function Test()
 		{
 			super();
-			
-			var g:FunctionTree = new FunctionTree;
-			g.initializeRandomly(5, true);
-			//trace(g);
-			s = new Simulator(40, 40, true, -1);
-			s.changeTickTime(100);
-			s.setNest(20, 20);
-			s.numAnts = 100;
+			_simulator = new Simulator(true, 40);
+			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;
-			s.setAntFunction(optimalFunction);
-			s.draw();
-			this.addChild(s);
-			//trace(s.startSimulation());
+			_simulator.setAntFunction(optimalFunction);
+			this.addChild(_simulator);
 			
-			
-			
-			/*
-			s = new Simulator(40, 40, true, 200);
-			
-			s.setNest(15, 20);
-			s.draw();
-			s.setAntFunction(this.optimalFunction);
-			this.addChild(s);
-			s.y = 20;*/
 			
 			var button:Button = new Button;
 			button.label = "Start";
@@ -99,8 +81,8 @@ package
 		}
 		
 		private function parametersChanged(e:SliderEvent = null):void {
-			s.changeTickTime(p.tickTimeSlider.value);
-			s.numAnts = p.numAntsSlider.value;
+			_simulator.changeTickTime(p.tickTimeSlider.value);
+			_simulator.numAnts = p.numAntsSlider.value;
 			p.numAntsText.text = String(p.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = p.dropPherormonesSlider.value;
 			GridPixel.dropFoodRadiusOnDoubleClick = p.amountFoodSlider.value;
@@ -108,11 +90,14 @@ package
 		}
 		
 		private function pauseHandler(e:MouseEvent):void {
-			s.pauseResumeSimulation();
+			_simulator.pauseResumeSimulation();
+			_simulator.resetSimulation();
 		}
 		
 		private function start(e:MouseEvent):void {
-			trace(s.startSimulation());
+			_simulator.resetSimulation();
+			_simulator.setTrainingSimulation();
+			_simulator.startSimulation();
 		}
 	}
 }

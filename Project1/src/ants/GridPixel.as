@@ -18,7 +18,7 @@ package ants
 		
 		public static var dropInPherormonePerTick:Number = .02;
 		
-		public static var dropFoodRadiusOnDoubleClick:uint = 5;
+		public static var dropFoodRadiusOnDoubleClick:uint = 2;
 		
 		public var simulator:Simulator;
 		
@@ -31,10 +31,20 @@ package ants
 		private var _antLayer:Sprite;
 		
 		private var _i:uint;
+		
 		private var _j:uint;
 		
 		private var _gradientPixel:GridPixel;
 		
+		
+		public function reset():void {
+			_pherormoneIntensity = 0;
+			if(_pherormoneIndicator != null)
+				_pherormoneIndicator.alpha = 0;
+			_food = 0;
+			if(_foodIndicator!= null)
+				_foodIndicator.alpha = 0;			
+		}
 		
 		public function GridPixel(s:uint, color:Number, sim:Simulator)
 		{
@@ -42,7 +52,8 @@ package ants
 			simulator = sim;
 			this._size = s;
 			_bkgColor = color;
-			sim.addEventListener(TickEvent.TICK_EVENT, tickHandler);
+			if(simulator.graphic)
+				simulator.addEventListener(TickEvent.TICK_EVENT, tickHandler);
 			this.doubleClickEnabled = true;
 			this.addEventListener(MouseEvent.CLICK, doubleClickHandler);
 		}
@@ -84,6 +95,10 @@ package ants
 			//if the food is drop in the nest it dissapears
 			if(simulator.nest != this){
 				_food++;
+				if(simulator.hashPixelsWithFood[coorX+","+coorY] == undefined){
+					simulator.hashPixelsWithFood[coorX+","+coorY] = true;
+					simulator.pixelsWithFood.push(this);
+				}
 			}else{
 				simulator.foodReturned();
 			}
@@ -91,11 +106,20 @@ package ants
 		
 		//indicates that one unit of time has passed
 		public function tickHandler(e:TickEvent):void {
-			_pherormoneIntensity = Math.max(0, _pherormoneIntensity - dropInPherormonePerTick);
-			if(_pherormoneIntensity  < .2)
-				this._gradientPixel = null;
-			if(this.simulator.graphic){
-				this.refresh();
+			if(e.withReset){
+				this.reset();
+				if(this.hasEventListener(TickEvent.TICK_EVENT))
+					simulator.removeEventListener(TickEvent.TICK_EVENT, tickHandler);
+			}else{
+				_pherormoneIntensity = Math.max(0, _pherormoneIntensity - dropInPherormonePerTick);
+				if(_pherormoneIntensity  < .2)
+					this._gradientPixel = null;
+				if(this.simulator.graphic){
+					this.refresh();
+				}else if(_pherormoneIntensity == 0){
+					if(this.hasEventListener(TickEvent.TICK_EVENT))
+						simulator.removeEventListener(TickEvent.TICK_EVENT, tickHandler);
+				}
 			}
 		}
 		
@@ -108,6 +132,8 @@ package ants
 		}
 		
 		public function dropPherormone(ant:Ant = null):void {
+			if(!this.hasEventListener(TickEvent.TICK_EVENT))
+				simulator.addEventListener(TickEvent.TICK_EVENT, tickHandler);
 			if(ant != null){
 				_gradientPixel = ant.previousPixel;
 			}
@@ -116,11 +142,13 @@ package ants
 				var j2:int = _pherormoneRadius - Math.abs(i);
 				for(var j:int = j1; j <= j2; j++){
 					var pixel:GridPixel = simulator.getPixel(coorX + i, coorY + j);
-					var L1Dist:uint = Math.abs(i) + Math.abs(j);
-					if(i ==0 && j ==0){	
-						pixel.pherormoneChange(1);
-					}else{
-						pixel.pherormoneChange(Math.pow((_pherormoneRadius -L1Dist)/_pherormoneRadius, 3));
+					if(pixel != null){
+						var L1Dist:uint = Math.abs(i) + Math.abs(j);
+						if(i ==0 && j ==0){	
+							pixel.pherormoneChange(1);
+						}else{
+							pixel.pherormoneChange(Math.pow((_pherormoneRadius -L1Dist)/_pherormoneRadius, 3));
+						}
 					}
 				}
 			}

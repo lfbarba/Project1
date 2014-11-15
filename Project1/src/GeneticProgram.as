@@ -68,6 +68,7 @@ package
 		private var counter:uint = 0;
 		
 		private var _simulator:Simulator;
+		private var _bigSimulator:Simulator;
 		
 		private var _simulatorParameters:SimulationParameters; 
 		
@@ -124,23 +125,33 @@ package
 		}
 		
 		private function setUpSimulator():void {
-			_simulator = new Simulator(16, 2, true, -1);
-			_simulator.changeTickTime(200);
-			_simulator.dropPileOfFood(0, 1, 2);
-			_simulator.dropPileOfFood(16, 1, 2);
-			_simulator.setNest(8, 1);
-			_simulator.numAnts = 40;
-			GridPixel.dropInPherormonePerTick = .01;
+			_simulator = new Simulator(true, -1);
+			_simulator.setTrainingSimulation();
 			_simulator.draw();
 			this.addChild(_simulator);
-			_simulator.y = 100;
+			_simulator.y = 80;
 			_simulator.x = 20;
+			
+			_bigSimulator = new Simulator(true, -1);
+			_bigSimulator._pixelSize = 13;
+			_bigSimulator.setSimulation(40, 40);
+			_bigSimulator.changeTickTime(200);
+			_bigSimulator.setNest(20, 20);
+			_bigSimulator.dropPileOfFood(0, 0, 7);
+			_bigSimulator.dropPileOfFood(40, 40, 7);
+			_bigSimulator.dropPileOfFood(20, 10, 4);
+			_bigSimulator.numAnts = 100;
+			GridPixel.dropInPherormonePerTick = .05;
+			_bigSimulator.draw();
+			this.addChild(_bigSimulator);
+			_bigSimulator.y = 120;
+			_bigSimulator.x = 0;
 			
 			var button:Button = new Button;
 			button.label = "Simulation Start";
 			button.addEventListener(MouseEvent.CLICK, this.startSimulation);
 			button.x = 110;
-			button.y = 80;
+			button.y = 50;
 			this.addChild(button);
 			
 			var pause:Button = new Button;
@@ -148,7 +159,7 @@ package
 			pause.addEventListener(MouseEvent.CLICK, pauseResumeSimulator);
 			this.addChild(pause);
 			pause.x = 310;
-			pause.y = 80;
+			pause.y = 50;
 			
 			/*_simulatorParameters = new SimulationParameters;
 			this.addChild(_simulatorParameters);
@@ -159,8 +170,6 @@ package
 			_simulatorParameters.dropPherormonesSlider.addEventListener(SliderEvent.CHANGE, simulatorParametersChanged);
 			//
 			simulatorParametersChanged();*/
-			
-			_simulator.setAntFunction(optimalFunction);
 		}
 
 		private function simulatorParametersChanged(e:SliderEvent = null):void {
@@ -176,7 +185,11 @@ package
 		}
 		
 		private function startSimulation(e:MouseEvent):void {
+			_simulator.resetSimulation();
+			_simulator.setTrainingSimulation();
 			_simulator.startSimulation();
+			
+			_bigSimulator.startSimulation();
 		}
 		
 		private function parametersChangeHandler(e:ParametersChangeEvent):void {
@@ -236,6 +249,7 @@ package
 		private function showIndividual(p:FunctionTree):void {
 			if(bestIndividual != null){
 				_simulator.setAntFunction(bestIndividual);
+				_bigSimulator.setAntFunction(bestIndividual);
 			}
 		}
 		
@@ -244,7 +258,7 @@ package
 			var min:Number =  this.mainPopulation.minimum;
 			var avg:Number = this.mainPopulation.average;
 			var best:Number =  this.bestFitness;
-			var current:Number =  mainPopulation.getElement(0).fitness;
+			var current:Number =  mainPopulation.getElement(0).fitness.x;
 			this.parameters.updateStatistics(max, min, 
 				avg, best, current, this.bestIndividual);
 		}
@@ -257,8 +271,12 @@ package
 			reportStatistics();
 			//show the best individual so far
 			var best:FunctionTree = mainPopulation.getElement(0);
-			if(best.fitness  >  bestFitness){
-				bestFitness = best.fitness;
+			
+			
+			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
+				if(bestIndividual != null)
+					trace(best.fitness, bestIndividual.fitness);
+				bestFitness = best.fitness.x;
 				bestIndividual = new FunctionTree(best);
 			}
 			this.showIndividual(mainPopulation.getElement(0));

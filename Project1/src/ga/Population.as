@@ -74,7 +74,8 @@ package ga
 		}
 		
 		public function sortByFitness(order:uint = 0):void {
-			population.sortOn("fitness", order);
+			population.sort(FunctionTree.compareFunctionTrees, order);
+			//population.sortOn("fitness", order);
 		}
 		
 		public function removeLast():FunctionTree {
@@ -103,8 +104,8 @@ package ga
 			var best:FunctionTree;
 			for(var i:uint = 0; i < tournamentSelectionRange; i++){
 				var ind:FunctionTree = this.population[Math.floor(Math.random() * this.size)] as FunctionTree;
-				if(max < ind.fitness){
-					max = ind.fitness;
+				if(max < ind.fitness.x){
+					max = ind.fitness.x;
 					best = ind;
 				}
 				candidates.push(ind);
@@ -129,9 +130,9 @@ package ga
 				if(bs.maxDepth > 7){
 					bs.initializeRandomly(4, true);
 				}
-				sum += bs.fitness;
-				max = Math.max(bs.fitness, max);
-				min = Math.min(bs.fitness, min);
+				sum += bs.fitness.x;
+				max = Math.max(bs.fitness.x, max);
+				min = Math.min(bs.fitness.x, min);
 			}
 			
 			this.populationAverage =  sum/population.length;

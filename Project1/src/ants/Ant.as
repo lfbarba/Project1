@@ -89,7 +89,7 @@ package ants
 				for(var j:int = -1; j <= 1; j++){
 					var distToNest:uint = Math.pow(nest.coorX - currentPixel.coorX - i, 2) + Math.pow(nest.coorY - currentPixel.coorY - j, 2);
 					var pixel:GridPixel = currentPixel.simulator.getPixel(currentPixel.coorX + i, currentPixel.coorY + j);
-					if(i != 0 && j != 0 && distToNest > L1toNest){
+					if(i != 0 && j != 0 && distToNest > L1toNest && pixel != null){
 						candidates.push(pixel);
 					}
 				}
@@ -102,9 +102,11 @@ package ants
 		}
 		
 		public function moveToPixel(pixel:GridPixel):void {
-			_previousPixel = currentPixel;
-			currentPixel = pixel;
-			currentPixel.addAnt(this.icon);
+			if(pixel != null){
+				_previousPixel = currentPixel;
+				currentPixel = pixel;
+				currentPixel.addAnt(this.icon);
+			}
 		}
 		
 		public function dropPherormone():void {
@@ -130,8 +132,11 @@ package ants
 		
 		public function moveToNest():void {
 			var nest:GridPixel = currentPixel.simulator.nest;
+			var x:uint = currentPixel.coorX;
+			var y:uint = currentPixel.coorY;
 			moveTowardsPixel(nest);
-			this.dropPherormone();
+			if(currentPixel.coorX != x || currentPixel.coorY != y)
+				this.dropPherormone();
 		}
 		
 		public function moveRandomly():void {

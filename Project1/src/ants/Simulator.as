@@ -13,7 +13,7 @@ package ants
 		private var _pixelWidth:uint;
 		private var _pixelHeight:uint;
 		
-		private var _pixelSize:uint = 16;
+		public var _pixelSize:uint = 16;
 		
 		public var nest:GridPixel;
 		
@@ -34,30 +34,78 @@ package ants
 		private var _numRounds:uint = 0;
 		
 		private var _maxNumRounds:int;
+
+		private var _drawn:Boolean = false;
 		
-		public function Simulator(w:uint, h:uint, withGraphics:Boolean = true, maxNumRounds:int = -1)
+		private static var _mainSimulator:Simulator;
+		
+		public var pixelsWithFood:Array;
+		public var hashPixelsWithFood:Array;
+		
+		private var _simulationAlreadySet:Boolean = false;
+		
+		public function Simulator( withGraphics:Boolean = true, maxNumRounds:int = -1)
 		{
 			super();
-			_pixelWidth = w;
-			_pixelHeight = h;
-			setUpPlayGround();
+			this._graphic = withGraphics;
 			_maxNumRounds = maxNumRounds;
 			//
-			this._graphic = withGraphics;
-			if(_graphic){
-				t = new Timer(10, 0);
-			}else{
-				t = new Timer(0, 0);
+			pixelsWithFood = new Array;
+			hashPixelsWithFood = new Array;
+		}
+		
+		public static function getTrainingSimulator():Simulator {
+			if(_mainSimulator == null){
+				_mainSimulator = new Simulator(false, 40);
 			}
-			t.addEventListener(TimerEvent.TIMER, runRoundOfSimulation);
+			return _mainSimulator;
+		}
+		
+		public function resetSimulation():void {
+			for(var i:uint = 0; i< pixelsWithFood.length; i++){
+				var p:GridPixel = pixelsWithFood[i] as GridPixel;
+				p.reset();
+			}
+			var resetEvent:TickEvent = new TickEvent(TickEvent.TICK_EVENT);
+			resetEvent.withReset = true;
+			this.dispatchEvent(resetEvent);
+			this.numAnts = 0;
+			
+			this._totalFood = 0;
+			this._foodRemaining = 0;
+			_paused = true;
+			
+			pixelsWithFood = new Array;
+			hashPixelsWithFood = new Array;
+		}
+		
+		
+		public function setSimulation(w:uint, h:uint):void {
+			if(!_simulationAlreadySet){
+				_pixelWidth = w;
+				_pixelHeight = h;
+				setUpPlayGround();
+				//
+				t = new Timer(50, 0);
+				t.addEventListener(TimerEvent.TIMER, runRoundOfSimulation);
+				_simulationAlreadySet = true;
+			}
+		}
+		
+		public function setTrainingSimulation():void {
+			setSimulation(15, 2);
+			changeTickTime(200);
+			setNest(8, 1);
+			dropPileOfFood(0, 1, 2);
+			dropPileOfFood(15, 1, 2);
+			dropPileOfFood(8, 0, 0);
+			numAnts = 20;
+			GridPixel.dropInPherormonePerTick = .05;
+			draw();
 		}
 		
 		public function get graphic():Boolean {
 			return _graphic;
-		}
-		
-		public function set graphic(b:Boolean):void {
-			this._graphic = b;
 		}
 		
 		public function set numAnts(n:uint):void {
@@ -72,10 +120,13 @@ package ants
 					a.moveToPixel(nest);
 				}
 			}else{
+				var h:Sprite = new Sprite;
+				h.visible = false;
+				this.addChild(h);
 				while(_numAnts < _ants.length){
 					a = _ants.pop();
 					a.icon.x = a.icon.y = -20;
-					this.addChild(a.icon);
+					h.addChild(a.icon);
 				}
 			}
 			this.refreshPixel();
@@ -173,24 +224,22 @@ package ants
 		}
 		
 		public function dropPileOfFood(x:uint, y:uint, radius:uint):void {
-			for(var i:uint = 0; i < _pixelWidth; i++){
-				for(var j:uint = 0; j < _pixelHeight; j++){
-					if(Math.abs(i - x) + Math.abs(j - y) <= radius){
-						var pixel:GridPixel = this.getPixel(i, j);
+			for(var i:int = -radius; i <= radius; i++){
+				var j1:int = -(radius - Math.abs(i));
+				var j2:int = radius - Math.abs(i);
+				for(var j:int = j1; j <= j2; j++){
+					var pixel:GridPixel = getPixel(x + i, y + j);
+					if(pixel != null){
 						pixel.addFood();
 						_totalFood ++;
 					}
 				}
-			}
+			}		
 		}
 		
 		public function getPixel(x:int, y:int):GridPixel {
-			//x = (x + _pixelWidth) % _pixelWidth;
-			//y = (y + pixelHeight) % pixelHeight;
-			x = Math.min(this.pixelWidth -1 , x);
-			y = Math.min(this.pixelHeight -1 , y);
-			x = Math.max(0, x);
-			y = Math.max(0, y);
+			if(x > pixelWidth -1 || x < 0 || y > pixelHeight -1 || y < 0)
+				return null
 			return this._pixels[x][y];
 		}
 		
@@ -222,12 +271,15 @@ package ants
 		}
 		
 		public function draw():void {
-			this.addChild(_playGround);
-			for(var i:uint = 0; i < _pixelWidth; i++){
-				for(var j:uint = 0; j < _pixelHeight; j++){
-					var pixel:GridPixel = _pixels[i][j] as GridPixel;
-					pixel.draw();
-					_playGround.addChild(pixel);
+			if(this.graphic && !_drawn){
+				_drawn = true;
+				this.addChild(_playGround);
+				for(var i:uint = 0; i < _pixelWidth; i++){
+					for(var j:uint = 0; j < _pixelHeight; j++){
+						var pixel:GridPixel = _pixels[i][j] as GridPixel;
+						pixel.draw();
+						_playGround.addChild(pixel);
+					}
 				}
 			}
 		}

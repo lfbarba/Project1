@@ -3,6 +3,7 @@ package gp
 	import ants.GridPixel;
 	import ants.Simulator;
 	
+	import flash.geom.Point;
 	import flash.media.Camera;
 	import flash.utils.*;
 	
@@ -14,7 +15,7 @@ package gp
 		public var root:TNode;
 		private var _functionsClasses:Array;
 		private var _terminalClasses:Array;
-		private var _fitness:Number;
+		private var _fitness:Point;
 		private var _fitnessComputed:Boolean = false;
 		
 		public function FunctionTree(copyFrom:FunctionTree = null)
@@ -29,24 +30,39 @@ package gp
 		}
 		
 		
-		public function get fitness():Number {
+		public function get fitness():Point {
 			if(!_fitnessComputed)
 				this.computeFitness();
 			return this._fitness;
 		}
 		
 		private function computeFitness():void {
-			var s:Simulator = new Simulator(16, 2, false, 40);
-			s.dropPileOfFood(0, 1, 2);
-			s.dropPileOfFood(16, 1, 2);
-			s.setNest(8, 1);
-			s.numAnts = 40;
-			GridPixel.dropInPherormonePerTick = .01;
+			var s:Simulator = Simulator.getTrainingSimulator();
+			s.resetSimulation();
+			s.setTrainingSimulation();
 			s.setAntFunction(this);
 			s.changeTickTime(0);
-			this._fitness = s.startSimulation();
-			
+			this._fitness = new Point(s.startSimulation(), -this.size);
 			_fitnessComputed = true;
+		}
+		
+		public static function compareFunctionTrees(A:FunctionTree, B:FunctionTree):int {
+			if(A == null || B == null){
+				throw new Error("Arguments are null");
+			}
+			if(A.fitness.x < B.fitness.x){
+				return -1;
+			}else if(A.fitness.x > B.fitness.x){
+				return 1;
+			}else{
+				if(A.fitness.y < B.fitness.y){
+					return -1;
+				}else if(A.fitness.y > B.fitness.y){
+					return 1;
+				}else{
+					return 0;
+				}
+			}
 		}
 		
 		public function subTreeReplacementMutation():void {
