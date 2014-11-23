@@ -34,7 +34,7 @@ package ants
 		private var _numRounds:uint = 0;
 		
 		private var _maxNumRounds:int;
-
+		
 		private var _drawn:Boolean = false;
 		
 		private static var _mainSimulator:Simulator;
@@ -96,9 +96,9 @@ package ants
 			setSimulation(15, 2);
 			changeTickTime(200);
 			setNest(8, 1);
-			dropPileOfFood(0, 1, 2);
-			dropPileOfFood(15, 1, 2);
-			dropPileOfFood(8, 0, 0);
+			dropPileOfFood(0, 1, 10);
+			dropPileOfFood(15, 1, 10);
+			dropPileOfFood(8, 0, 10);
 			numAnts = 20;
 			GridPixel.dropInPherormonePerTick = .05;
 			draw();
@@ -223,18 +223,22 @@ package ants
 			nest = this.getPixel(x, y);
 		}
 		
-		public function dropPileOfFood(x:uint, y:uint, radius:uint):void {
-			for(var i:int = -radius; i <= radius; i++){
-				var j1:int = -(radius - Math.abs(i));
-				var j2:int = radius - Math.abs(i);
-				for(var j:int = j1; j <= j2; j++){
-					var pixel:GridPixel = getPixel(x + i, y + j);
-					if(pixel != null){
-						pixel.addFood();
-						_totalFood ++;
-					}
-				}
-			}		
+		public function dropPileOfFood(x:uint, y:uint, amount:uint):void {
+			var pixel:GridPixel = getPixel(x, y);
+			if(pixel != null){
+				pixel.addFood(amount);
+			}
+			/*for(var i:int = -amount; i <= amount; i++){
+			var j1:int = -(amount - Math.abs(i));
+			var j2:int = amount - Math.abs(i);
+			for(var j:int = j1; j <= j2; j++){
+			var pixel:GridPixel = getPixel(x + i, y + j);
+			if(pixel != null){
+			pixel.addFood();
+			_totalFood ++;
+			}
+			}
+			}*/		
 		}
 		
 		public function getPixel(x:int, y:int):GridPixel {

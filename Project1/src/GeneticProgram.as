@@ -52,7 +52,7 @@ package
 		private var t:Timer;
 		
 		private var elitismNumber:uint = 10;
-				
+		
 		private var visualLayer:Sprite;
 		
 		private var bestIndividual:FunctionTree;
@@ -171,13 +171,13 @@ package
 			//
 			simulatorParametersChanged();*/
 		}
-
+		
 		private function simulatorParametersChanged(e:SliderEvent = null):void {
 			_simulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
 			_simulator.numAnts = _simulatorParameters.numAntsSlider.value;
 			_simulatorParameters.numAntsText.text = String(_simulatorParameters.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = _simulatorParameters.dropPherormonesSlider.value;
-			GridPixel.dropFoodRadiusOnDoubleClick = _simulatorParameters.amountFoodSlider.value;
+			GridPixel.amountOfFoodPerClick = _simulatorParameters.amountFoodSlider.value;
 		}
 		
 		private function pauseResumeSimulator(e:MouseEvent):void {
@@ -204,7 +204,7 @@ package
 			createPopulation();
 			t.start();
 		}
-
+		
 		private function stopProcess(e:MouseEvent = null):void {
 			t.stop();
 			this.bestFitness = -100000;
@@ -263,7 +263,7 @@ package
 				avg, best, current, this.bestIndividual);
 		}
 		
-
+		
 		
 		private function runOneGeneration():void {
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
@@ -311,7 +311,7 @@ package
 			return bs1;
 		}
 		
-	
+		
 		
 		private function reproduceAndAddToPopulation(bs1:FunctionTree, bs2:FunctionTree, population:Population):void{
 			//cross over or reinstert them into pupulation

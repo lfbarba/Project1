@@ -14,11 +14,11 @@ package ants
 		
 		private var _pherormoneColor:Number = 0x0000FF;
 		
-		private var _pherormoneRadius:uint = 4;
+		private var _pherormoneRadius:uint = 0;
 		
 		public static var dropInPherormonePerTick:Number = .02;
 		
-		public static var dropFoodRadiusOnDoubleClick:uint = 2;
+		public static var amountOfFoodPerClick:uint = 10;
 		
 		public var simulator:Simulator;
 		
@@ -59,7 +59,7 @@ package ants
 		}
 		
 		private function doubleClickHandler(e:MouseEvent):void {
-			simulator.dropPileOfFood(coorX, coorY, dropFoodRadiusOnDoubleClick);
+			simulator.dropPileOfFood(coorX, coorY, amountOfFoodPerClick);
 			simulator.refreshPixel();
 		}
 		
@@ -91,10 +91,10 @@ package ants
 			_food--;
 		}
 		
-		public function addFood():void {
+		public function addFood(amount:uint = 1):void {
 			//if the food is drop in the nest it dissapears
 			if(simulator.nest != this){
-				_food++;
+				_food += amount;
 				if(simulator.hashPixelsWithFood[coorX+","+coorY] == undefined){
 					simulator.hashPixelsWithFood[coorX+","+coorY] = true;
 					simulator.pixelsWithFood.push(this);
@@ -160,7 +160,7 @@ package ants
 		
 		public function refresh():void {
 			if(simulator.graphic){
-				_foodIndicator.alpha = Math.min(1, foodAmount / 3);
+				_foodIndicator.alpha = Math.min(1, Math.min(1, foodAmount/3));
 				if(this.simulator.nest == this){
 					_bkg.graphics.beginFill(0x444444);
 					_bkg.graphics.drawRect(0, 0, _size, _size);

@@ -29,10 +29,17 @@ package
 		public function Test()
 		{
 			super();
-			_simulator = new Simulator(true, 40);
+			_simulator = new Simulator(true, -1);
 			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;
 			_simulator.setAntFunction(optimalFunction);
+			
+			_simulator.setSimulation(40, 40);
+			_simulator.changeTickTime(200);
+			_simulator.setNest(20, 20);
+			_simulator.numAnts = 100;
+			_simulator.draw();
+			
 			this.addChild(_simulator);
 			
 			
@@ -47,7 +54,7 @@ package
 			this.addChild(pause);
 			pause.x = 200;
 			
-			/*p = new SimulationParameters;
+			p = new SimulationParameters;
 			this.addChild(p);
 			p.x = 660;
 			p.tickTimeSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
@@ -55,7 +62,7 @@ package
 			p.amountFoodSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
 			p.dropPherormonesSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
 			//
-			parametersChanged();*/
+			parametersChanged();
 		}
 		
 		private function get optimalFunction():FuncionEvaluable {
@@ -85,7 +92,7 @@ package
 			_simulator.numAnts = p.numAntsSlider.value;
 			p.numAntsText.text = String(p.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = p.dropPherormonesSlider.value;
-			GridPixel.dropFoodRadiusOnDoubleClick = p.amountFoodSlider.value;
+			GridPixel.amountOfFoodPerClick = p.amountFoodSlider.value;
 			//s.changeTickTime(0);
 		}
 		
@@ -95,8 +102,8 @@ package
 		}
 		
 		private function start(e:MouseEvent):void {
-			_simulator.resetSimulation();
-			_simulator.setTrainingSimulation();
+			//_simulator.resetSimulation();
+			//_simulator.setTrainingSimulation();
 			_simulator.startSimulation();
 		}
 	}

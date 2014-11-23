@@ -16,7 +16,7 @@ package ants
 		private var _icon:Sprite;
 		private var _carryingIcon:Sprite;
 		private var _seinsingIcon:Sprite;
-			
+		
 		public function Ant()
 		{
 			super();
@@ -117,11 +117,12 @@ package ants
 			if(currentPixel.pherormoneIntensity > 0){
 				//move to the highest pherormone node that is farther than you from the nest
 				if(currentPixel.gradient != null){
-					if(Math.random() < .7){
-						moveToPixel(currentPixel.gradient);
+					/*if(Math.random() < .7){
+					moveToPixel(currentPixel.gradient);
 					}else{
-						this.moveRandomlyAwayFromNestPixel();
-					}
+					this.moveRandomlyAwayFromNestPixel();
+					}*/
+					moveToPixel(currentPixel.gradient);
 				}else{
 					this.moveRandomlyAwayFromNestPixel();
 				}
