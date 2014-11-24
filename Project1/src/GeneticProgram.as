@@ -274,6 +274,8 @@ package
 			
 			
 			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
+				if(bestIndividual != null)
+					trace(best.fitness, bestIndividual.fitness);
 				bestFitness = best.fitness.x;
 				bestIndividual = new FunctionTree(best);
 			}
