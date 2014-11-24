@@ -117,12 +117,11 @@ package ants
 			if(currentPixel.pherormoneIntensity > 0){
 				//move to the highest pherormone node that is farther than you from the nest
 				if(currentPixel.gradient != null){
-					/*if(Math.random() < .7){
-					moveToPixel(currentPixel.gradient);
+					if(Math.random() < .7){
+						moveToPixel(currentPixel.gradient);
 					}else{
-					this.moveRandomlyAwayFromNestPixel();
-					}*/
-					moveToPixel(currentPixel.gradient);
+						this.moveRandomlyAwayFromNestPixel();
+					}
 				}else{
 					this.moveRandomlyAwayFromNestPixel();
 				}

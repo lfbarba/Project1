@@ -173,11 +173,11 @@ package
 		}
 		
 		private function simulatorParametersChanged(e:SliderEvent = null):void {
-			_bigSimulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
-			_bigSimulator.numAnts = _simulatorParameters.numAntsSlider.value;
+			_simulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
+			_simulator.numAnts = _simulatorParameters.numAntsSlider.value;
 			_simulatorParameters.numAntsText.text = String(_simulatorParameters.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = _simulatorParameters.dropPherormonesSlider.value;
-			GridPixel.amountOfFoodPerClick = _simulatorParameters.amountFoodSlider.value;
+			GridPixel.dropFoodRadiusOnDoubleClick = _simulatorParameters.amountFoodSlider.value;
 		}
 		
 		private function pauseResumeSimulator(e:MouseEvent):void {
@@ -274,8 +274,6 @@ package
 			
 			
 			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
-				if(bestIndividual != null)
-					trace(best.fitness, bestIndividual.fitness);
 				bestFitness = best.fitness.x;
 				bestIndividual = new FunctionTree(best);
 			}
