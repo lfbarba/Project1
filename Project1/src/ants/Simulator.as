@@ -197,7 +197,7 @@ package ants
 			
 			this.dispatchEvent(new TickEvent(TickEvent.TICK_EVENT));
 			_numRounds ++;
-			if(_numRounds % 50 == 0)
+			if(this._graphic && _numRounds % 50 == 0)
 				trace("_numRounds", _numRounds, "totalFood", _totalFood, "foodRemaining", _foodRemaining);
 			if(_numRounds != _maxNumRounds){
 				if(this.graphic){

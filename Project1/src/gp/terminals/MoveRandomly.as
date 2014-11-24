@@ -14,7 +14,7 @@ package gp.terminals
 			super();
 		}
 		
-		override public function get encoding():String {
+		override public function encoding(depth:uint):String {
 			return String(flash.utils.getQualifiedClassName(this));
 		}
 		

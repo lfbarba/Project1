@@ -46,7 +46,7 @@ package
 		
 		private var convergenceTreshhold:Number = .01;
 		
-		private var maxNumGenerations:uint = 100;
+		private var maxNumGenerations:uint = 20;
 		public static var numGenerations:uint = 0;
 		
 		
@@ -73,17 +73,14 @@ package
 		
 		private var _simulatorParameters:SimulationParameters; 
 		
+		private var _savedFunctions:Array;
 		
 		public function GeneticProgram()
 		{
-			var saveDataObject:SharedObject = SharedObject.getLocal("test");
-			//saveDataObject.data.tree = f;
-			//saveDataObject.flush();
-			
 			visualLayer = new Sprite;
 			this.addChild(visualLayer);
 			
-			t = new Timer(0, 0);
+			t = new Timer(0.01, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
 			
 			//botton para iniciar
@@ -142,9 +139,6 @@ package
 			_bigSimulator.setSimulation(40, 40);
 			_bigSimulator.changeTickTime(200);
 			_bigSimulator.setNest(20, 20);
-			_bigSimulator.dropPileOfFood(0, 0, 7);
-			_bigSimulator.dropPileOfFood(40, 40, 7);
-			_bigSimulator.dropPileOfFood(20, 10, 4);
 			_bigSimulator.numAnts = 100;
 			GridPixel.dropInPherormonePerTick = .05;
 			_bigSimulator.draw();
@@ -187,6 +181,7 @@ package
 		
 		private function pauseResumeSimulator(e:MouseEvent):void {
 			_simulator.pauseResumeSimulation();
+			_bigSimulator.pauseResumeSimulation();
 		}
 		
 		private function startSimulation(e:MouseEvent):void {
@@ -194,6 +189,8 @@ package
 			_simulator.setTrainingSimulation();
 			_simulator.startSimulation();
 			
+			_bigSimulator.resetSimulation();
+			_bigSimulator.numAnts = 100;
 			_bigSimulator.startSimulation();
 		}
 		
@@ -202,6 +199,8 @@ package
 			this.crossOverProbability = e.parameters.getCrossoverProbability();
 			this.mutationProbability = e.parameters.getMutationProbability();
 			this.selectionType = e.parameters.getSelectionType();
+			this._simulator.setAntFunction(e.parameters.getAntFunction());
+			this._bigSimulator.setAntFunction(e.parameters.getAntFunction());
 		}
 		
 		private function startGeneticAlgorithm(e:MouseEvent):void {
@@ -253,13 +252,6 @@ package
 			}
 		}
 		
-		private function showIndividual(p:FunctionTree):void {
-			if(bestIndividual != null){
-				_simulator.setAntFunction(bestIndividual);
-				_bigSimulator.setAntFunction(bestIndividual);
-			}
-		}
-		
 		private function reportStatistics():void {
 			var max:Number = this.mainPopulation.maximum;
 			var min:Number =  this.mainPopulation.minimum;
@@ -282,10 +274,9 @@ package
 			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
 				bestFitness = best.fitness.x;
 				bestIndividual = best;
-				this.showIndividual(bestIndividual);
 			}
+			reportStatistics();
 			mainPopulation.addElement(new FunctionTree(bestIndividual));
-			
 			var newPopulation:Population = new Population(parameters);
 			
 			for(var j:uint = 0; j < elitismNumber; j++){
@@ -309,7 +300,6 @@ package
 			
 			mainPopulation = newPopulation;
 			mainPopulation.addElement(new FunctionTree(bestIndividual));
-			reportStatistics();
 		}
 		
 		private function selectIndividual():FunctionTree {

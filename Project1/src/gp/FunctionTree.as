@@ -3,6 +3,7 @@ package gp
 	import ants.GridPixel;
 	import ants.Simulator;
 	
+	import flash.display.Sprite;
 	import flash.geom.Point;
 	import flash.media.Camera;
 	import flash.utils.*;
@@ -224,8 +225,20 @@ package gp
 			return this.root.toString();
 		}
 		
+		public function get label():String {
+			return this.root.identifier;
+		}
+		
+		public function get value():FunctionTree {
+			return this;
+		}
+		
+		public function get icon():Sprite {
+			return new Sprite;
+		}
+		
 		public function encode():String {
-			return root.maxDepth+"|"+this.root.encoding;
+			return root.maxDepth+"|"+this.root.encoding(root.maxDepth);
 		}
 		
 		public function decodeFromData(data:String):void {
@@ -236,10 +249,14 @@ package gp
 		}
 		
 		private function decode(data:String, depth:uint):TNode {
-			trace(depth, data);
 			var a:Array = data.split("("+depth+")");
-			trace("class=>", a[0]);
+			try{
 			var cl:Class = Class(getDefinitionByName(a[0]));
+			}catch(e:Error){
+				//trace("depth", depth, "data", data);
+				//trace("class name tried", a[0]);
+				throw(e);
+			}
 			var node:TNode = new cl as TNode;
 			for(var i:uint = 1; i < a.length; i++){
 				if(depth >0)

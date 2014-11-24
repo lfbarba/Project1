@@ -8,7 +8,6 @@ package gp
 		private var _identifier:String;
 		public var children:Array;
 		private var _numChildren:uint = 0;
-		
 		private var _parent:TNode;
 		
 		private var _size:uint = 0;
@@ -100,7 +99,7 @@ package gp
 			return "empty";
 		}
 		
-		public function get encoding():String {
+		public function encoding(depth:uint):String {
 			return "empty";
 		}
 		

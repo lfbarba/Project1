@@ -30,14 +30,15 @@ package
 		{
 			super();
 			
-			var f:FunctionTree = this.optimalFunction as FunctionTree;
-			trace(f.encode());
+			/*var f:FunctionTree = new FunctionTree;
+			f.initializeRandomly(6, false);
+			trace(f);
 			var g:FunctionTree = new FunctionTree;
 			g.decodeFromData(f.encode());
 			trace(g);
-			return;
+			return;*/
 			
-			
+					
 			_simulator = new Simulator(true, -1);
 			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;

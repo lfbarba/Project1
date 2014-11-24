@@ -2,9 +2,10 @@ package gp.functions
 {
 	import ants.Ant;
 	
+	import flash.utils.*;
+	
 	import gp.TFunction;
 	import gp.TNode;
-	import flash.utils.*;
 
 	public class IfNest extends TNode implements TFunction
 	{
@@ -16,10 +17,10 @@ package gp.functions
 			super();
 		}
 		
-		override public function get encoding():String {
+		override public function encoding(depth:uint):String {
 			setArgs();
-			var delimiter:String = "("+this.maxDepth+")";
-			return String(flash.utils.getQualifiedClassName(this))+delimiter+arg1.encoding+ delimiter+arg2.encoding;
+			var delimiter:String = "("+depth+")";
+			return String(flash.utils.getQualifiedClassName(this))+delimiter+arg1.encoding(depth-1)+ delimiter+arg2.encoding(depth-1);
 		}
 		
 		public function get numArguments():uint{
