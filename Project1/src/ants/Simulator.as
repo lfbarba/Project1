@@ -95,12 +95,11 @@ package ants
 		public function setTrainingSimulation():void {
 			setSimulation(15, 2);
 			changeTickTime(200);
-			setNest(8, 1);
+			setNest(5, 1);
 			dropPileOfFood(0, 1, 10);
-			dropPileOfFood(15, 1, 10);
-			dropPileOfFood(8, 0, 10);
+			dropPileOfFood(6, 1, 1);
 			numAnts = 20;
-			GridPixel.dropInPherormonePerTick = .05;
+			GridPixel.dropInPherormonePerTick = .1;
 			draw();
 		}
 		
@@ -227,6 +226,7 @@ package ants
 			var pixel:GridPixel = getPixel(x, y);
 			if(pixel != null){
 				pixel.addFood(amount);
+				_totalFood += amount;
 			}
 			/*for(var i:int = -amount; i <= amount; i++){
 			var j1:int = -(amount - Math.abs(i));

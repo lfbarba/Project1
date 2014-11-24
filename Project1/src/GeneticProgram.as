@@ -173,8 +173,8 @@ package
 		}
 		
 		private function simulatorParametersChanged(e:SliderEvent = null):void {
-			_simulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
-			_simulator.numAnts = _simulatorParameters.numAntsSlider.value;
+			_bigSimulator.changeTickTime(_simulatorParameters.tickTimeSlider.value);
+			_bigSimulator.numAnts = _simulatorParameters.numAntsSlider.value;
 			_simulatorParameters.numAntsText.text = String(_simulatorParameters.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = _simulatorParameters.dropPherormonesSlider.value;
 			GridPixel.amountOfFoodPerClick = _simulatorParameters.amountFoodSlider.value;

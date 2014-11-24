@@ -41,7 +41,6 @@ package gp
 			s.resetSimulation();
 			s.setTrainingSimulation();
 			s.setAntFunction(this);
-			s.changeTickTime(0);
 			this._fitness = new Point(s.startSimulation(), -this.size);
 			_fitnessComputed = true;
 		}

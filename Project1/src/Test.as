@@ -29,16 +29,11 @@ package
 		public function Test()
 		{
 			super();
-			_simulator = new Simulator(true, -1);
+			_simulator = new Simulator(false, 50);
 			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;
 			_simulator.setAntFunction(optimalFunction);
-			
-			_simulator.setSimulation(40, 40);
-			_simulator.changeTickTime(200);
-			_simulator.setNest(20, 20);
-			_simulator.numAnts = 100;
-			_simulator.draw();
+			_simulator.setTrainingSimulation();
 			
 			this.addChild(_simulator);
 			
@@ -102,8 +97,8 @@ package
 		}
 		
 		private function start(e:MouseEvent):void {
-			//_simulator.resetSimulation();
-			//_simulator.setTrainingSimulation();
+			_simulator.resetSimulation();
+			_simulator.setTrainingSimulation();
 			_simulator.startSimulation();
 		}
 	}
