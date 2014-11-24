@@ -45,7 +45,7 @@ package gp.functions
 		
 		override public function toString():String {
 			setArgs();
-			return indent+"DropPherormone"+"\n"+ arg1.toString();;
+			return indent+"DropPheromone"+"\n"+ arg1.toString();;
 		}
 	}
 }

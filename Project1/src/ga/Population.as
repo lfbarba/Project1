@@ -14,6 +14,7 @@ package ga
 		private var populationMaximum:Number = 0;
 		private var populationMinimum:Number = Number.POSITIVE_INFINITY;
 		private var populationSum:Number = 0;
+		private var populationSizeAverage:Number = 0;
 		
 		private var population:Array;
 		
@@ -63,6 +64,12 @@ package ga
 			if(this.fitnessComputed == false)
 				this.computePopulationFitness();
 			return this.populationSum;
+		}
+		
+		public function get averageSize():Number {
+			if(this.fitnessComputed == false)
+				this.computePopulationFitness();
+			return populationSizeAverage;
 		}
 		
 		public function getElement(index:uint):FunctionTree {
@@ -121,6 +128,7 @@ package ga
 			fitnessComputed = true;
 			
 			var sum:Number = 0;
+			var sumSize:Number = 0;
 			var max:Number = Number.NEGATIVE_INFINITY;
 			var min:Number = Number.POSITIVE_INFINITY;
 			var squareSum:Number = 0;
@@ -131,11 +139,13 @@ package ga
 					bs.initializeRandomly(4, true);
 				}
 				sum += bs.fitness.x;
+				sumSize += bs.size;
 				max = Math.max(bs.fitness.x, max);
 				min = Math.min(bs.fitness.x, min);
 			}
 			
 			this.populationAverage =  sum/population.length;
+			this.populationSizeAverage = sumSize/population.length;
 			this.populationMaximum = max;
 			this.populationMinimum = min;
 			this.populationSum = sum;			

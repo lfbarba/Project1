@@ -135,9 +135,10 @@ package ants
 			var nest:GridPixel = currentPixel.simulator.nest;
 			var x:uint = currentPixel.coorX;
 			var y:uint = currentPixel.coorY;
+			//this.dropPherormone();
 			moveTowardsPixel(nest);
-			if(currentPixel.coorX != x || currentPixel.coorY != y)
-				this.dropPherormone();
+			//if(currentPixel.coorX != x || currentPixel.coorY != y)
+				//this.dropPherormone();
 		}
 		
 		public function moveRandomly():void {

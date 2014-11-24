@@ -11,6 +11,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
+	import flash.net.SharedObject;
 	import flash.utils.Timer;
 	
 	import ga.Parameters;
@@ -45,7 +46,7 @@ package
 		
 		private var convergenceTreshhold:Number = .01;
 		
-		private var maxNumGenerations:uint = 20;
+		private var maxNumGenerations:uint = 100;
 		public static var numGenerations:uint = 0;
 		
 		
@@ -75,6 +76,14 @@ package
 		
 		public function GeneticProgram()
 		{
+			var f:FunctionTree;// = new FunctionTree;
+			//f.initializeRandomly(3, true);
+			var saveDataObject:SharedObject = SharedObject.getLocal("test");
+			//saveDataObject.data.tree = f;
+			//saveDataObject.flush();
+			f = saveDataObject.data.tree as FunctionTree;
+			trace(f.toString());
+			
 			visualLayer = new Sprite;
 			this.addChild(visualLayer);
 			
@@ -202,12 +211,14 @@ package
 		private function startGeneticAlgorithm(e:MouseEvent):void {
 			numGenerations = 0;
 			createPopulation();
+			this.bestFitness = Number.NEGATIVE_INFINITY;
+			this.bestIndividual = null;
 			t.start();
 		}
 		
 		private function stopProcess(e:MouseEvent = null):void {
 			t.stop();
-			this.bestFitness = -100000;
+			this.bestFitness = Number.NEGATIVE_INFINITY;
 			this.bestIndividual = null;
 		}
 		
@@ -242,7 +253,7 @@ package
 			mainPopulation.sortByFitness(Array.DESCENDING || Array.NUMERIC);
 			for(var i:uint = 0; i< mainPopulation.size; i++){
 				var bs:FunctionTree = mainPopulation.getElement(i);
-				trace(bs.toString());
+				trace(bs.toString(), bs.fitness);
 			}
 		}
 		
@@ -260,7 +271,7 @@ package
 			var best:Number =  this.bestFitness;
 			var current:Number =  mainPopulation.getElement(0).fitness.x;
 			this.parameters.updateStatistics(max, min, 
-				avg, best, current, this.bestIndividual);
+				avg, best, current, this.bestIndividual, mainPopulation.getElement(0).size, mainPopulation.averageSize);
 		}
 		
 		
@@ -268,16 +279,16 @@ package
 		private function runOneGeneration():void {
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			mainPopulation.computePopulationFitness();
-			reportStatistics();
 			//show the best individual so far
-			var best:FunctionTree = mainPopulation.getElement(0);
+			var best:FunctionTree = mainPopulation.removeFirst();
 			
 			
 			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
 				bestFitness = best.fitness.x;
-				bestIndividual = new FunctionTree(best);
+				bestIndividual = best;
+				this.showIndividual(bestIndividual);
 			}
-			this.showIndividual(mainPopulation.getElement(0));
+			mainPopulation.addElement(new FunctionTree(bestIndividual));
 			
 			var newPopulation:Population = new Population(parameters);
 			
@@ -301,6 +312,8 @@ package
 			}
 			
 			mainPopulation = newPopulation;
+			mainPopulation.addElement(new FunctionTree(bestIndividual));
+			reportStatistics();
 		}
 		
 		private function selectIndividual():FunctionTree {

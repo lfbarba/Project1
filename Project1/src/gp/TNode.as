@@ -2,7 +2,7 @@ package gp
 {
 	import flash.utils.*;
 	
-	public class TNode
+	public class TNode implements IExternalizable
 	{
 		
 		private var _identifier:String;

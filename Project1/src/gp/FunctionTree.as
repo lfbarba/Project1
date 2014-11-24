@@ -20,8 +20,7 @@ package gp
 		
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
-
-			_functionsClasses = new Array(IfCarryingFood, IfFood, IfNest, IfPherormone, DropFood);
+			_functionsClasses = new Array(IfCarryingFood, IfFood, IfNest, IfPherormone, DropFood, DropPherormone);
 			_terminalClasses = new Array(MoveRandomly, MoveToNest, MoveToPherormone);
 			
 			if(copyFrom != null){
@@ -37,11 +36,9 @@ package gp
 		}
 		
 		private function computeFitness():void {
-			var s:Simulator = Simulator.getTrainingSimulator();
-			s.resetSimulation();
+			var s:Simulator = new Simulator(false, 50);
 			s.setTrainingSimulation();
 			s.setAntFunction(this);
-			s.changeTickTime(0);
 			this._fitness = new Point(s.startSimulation(), -this.size);
 			_fitnessComputed = true;
 		}
