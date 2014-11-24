@@ -29,12 +29,10 @@ package
 		public function Test()
 		{
 			super();
-			_simulator = new Simulator(false, 50);
+			_simulator = new Simulator(true, 40);
 			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;
 			_simulator.setAntFunction(optimalFunction);
-			_simulator.setTrainingSimulation();
-			
 			this.addChild(_simulator);
 			
 			
@@ -49,7 +47,7 @@ package
 			this.addChild(pause);
 			pause.x = 200;
 			
-			p = new SimulationParameters;
+			/*p = new SimulationParameters;
 			this.addChild(p);
 			p.x = 660;
 			p.tickTimeSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
@@ -57,7 +55,7 @@ package
 			p.amountFoodSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
 			p.dropPherormonesSlider.addEventListener(SliderEvent.CHANGE, parametersChanged);
 			//
-			parametersChanged();
+			parametersChanged();*/
 		}
 		
 		private function get optimalFunction():FuncionEvaluable {
@@ -87,7 +85,7 @@ package
 			_simulator.numAnts = p.numAntsSlider.value;
 			p.numAntsText.text = String(p.numAntsSlider.value);
 			GridPixel.dropInPherormonePerTick = p.dropPherormonesSlider.value;
-			GridPixel.amountOfFoodPerClick = p.amountFoodSlider.value;
+			GridPixel.dropFoodRadiusOnDoubleClick = p.amountFoodSlider.value;
 			//s.changeTickTime(0);
 		}
 		
