@@ -222,7 +222,7 @@ package
 			if(this.populationHasConverged()){
 				stopProcess();
 			}else{
-				this.parameters.updateNumGenerations(numGenerations);
+				this.parameters.updateNumGenerations(2*numGenerations);
 				runOneGeneration();
 				//
 				if(maxNumGenerations != numGenerations){
