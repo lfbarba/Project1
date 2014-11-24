@@ -76,13 +76,9 @@ package
 		
 		public function GeneticProgram()
 		{
-			var f:FunctionTree;// = new FunctionTree;
-			//f.initializeRandomly(3, true);
 			var saveDataObject:SharedObject = SharedObject.getLocal("test");
 			//saveDataObject.data.tree = f;
 			//saveDataObject.flush();
-			f = saveDataObject.data.tree as FunctionTree;
-			trace(f.toString());
 			
 			visualLayer = new Sprite;
 			this.addChild(visualLayer);

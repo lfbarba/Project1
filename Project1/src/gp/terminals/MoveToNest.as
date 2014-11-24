@@ -13,6 +13,10 @@ package gp.terminals
 			super();
 		}
 		
+		override public function get encoding():String {
+			return "MoveToNest";
+		}
+		
 		override public function get evaluate():* {
 			var a:Ant = Ant.currentAnt;
 			a.moveToNest();

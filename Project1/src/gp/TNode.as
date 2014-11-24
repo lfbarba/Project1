@@ -2,7 +2,7 @@ package gp
 {
 	import flash.utils.*;
 	
-	public class TNode implements IExternalizable
+	public class TNode
 	{
 		
 		private var _identifier:String;
@@ -97,6 +97,10 @@ package gp
 		}
 		
 		public function toString():String {
+			return "empty";
+		}
+		
+		public function get encoding():String {
 			return "empty";
 		}
 		

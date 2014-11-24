@@ -223,5 +223,26 @@ package gp
 		public function toString():String {
 			return this.root.toString();
 		}
+		
+		public function encode():String {
+			return root.maxDepth+"|"+this.root.encoding;
+		}
+		
+		public function decodeFromData(data:String):void {
+			var a:Array = data.split("|");
+			var d:uint = Number(a[0]);
+			var newRoot:TNode = this.decode(a[1], d);
+			this.root = newRoot.copy();
+		}
+		
+		private function decode(data:String, depth:uint):TNode {
+			var a:Array = data.split("("+depth+")");
+			var cl:Class = Class(getDefinitionByName(a[0]));
+			trace(cl);
+			var node:TNode = new cl as TNode;
+			node.addChild(decode(a[1], depth+1));
+			node.addChild(decode(a[2], depth+1));
+			return node;
+		}
 	}
 }

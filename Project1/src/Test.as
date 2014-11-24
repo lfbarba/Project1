@@ -29,6 +29,15 @@ package
 		public function Test()
 		{
 			super();
+			
+			var f:FunctionTree = this.optimalFunction as FunctionTree;
+			trace(f.encode());
+			var g:FunctionTree = new FunctionTree;
+			g.decodeFromData(f.encode());
+			trace(g);
+			return;
+			
+			
 			_simulator = new Simulator(true, -1);
 			_simulator.y = 20;
 			GridPixel.dropInPherormonePerTick = .05;

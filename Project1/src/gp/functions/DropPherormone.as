@@ -15,6 +15,12 @@ package gp.functions
 			super();
 		}
 		
+		override public function get encoding():String {
+			setArgs();
+			var delimiter:String = "("+this.maxDepth+")";
+			return String(flash.utils.getQualifiedClassName(this))+delimiter+arg1.encoding;
+		}
+		
 		override public function get evaluate():* {
 			setArgs();
 			var a:Ant = Ant.currentAnt;
