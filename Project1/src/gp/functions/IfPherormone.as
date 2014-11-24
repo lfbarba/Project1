@@ -4,6 +4,7 @@ package gp.functions
 	
 	import gp.TFunction;
 	import gp.TNode;
+	import flash.utils.*;
 
 	public class IfPherormone extends TNode implements TFunction
 	{

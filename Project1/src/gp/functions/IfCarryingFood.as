@@ -4,6 +4,7 @@ package gp.functions
 	
 	import gp.TFunction;
 	import gp.TNode;
+	import flash.utils.*;
 
 	public class IfCarryingFood extends TNode implements TFunction
 	{

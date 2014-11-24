@@ -236,12 +236,15 @@ package gp
 		}
 		
 		private function decode(data:String, depth:uint):TNode {
+			trace(depth, data);
 			var a:Array = data.split("("+depth+")");
+			trace("class=>", a[0]);
 			var cl:Class = Class(getDefinitionByName(a[0]));
-			trace(cl);
 			var node:TNode = new cl as TNode;
-			node.addChild(decode(a[1], depth+1));
-			node.addChild(decode(a[2], depth+1));
+			for(var i:uint = 1; i < a.length; i++){
+				if(depth >0)
+					node.addChild(decode(a[i], depth-1));
+			}
 			return node;
 		}
 	}

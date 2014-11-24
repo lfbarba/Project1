@@ -4,6 +4,7 @@ package gp.terminals
 	
 	import gp.TNode;
 	import gp.TTerminal;
+	import flash.utils.*;
 	
 	public class MoveRandomly extends TNode implements TTerminal
 	{
@@ -14,7 +15,7 @@ package gp.terminals
 		}
 		
 		override public function get encoding():String {
-			return "MoveRandomly";
+			return String(flash.utils.getQualifiedClassName(this));
 		}
 		
 		override public function get evaluate():* {

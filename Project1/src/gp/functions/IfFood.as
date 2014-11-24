@@ -5,6 +5,7 @@ package gp.functions
 	import gp.TFunction;
 	import gp.TNode;
 	import gp.terminals.MoveRandomly;
+	import flash.utils.*;
 
 	public class IfFood extends TNode implements TFunction
 	{

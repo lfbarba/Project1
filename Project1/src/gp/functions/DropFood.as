@@ -5,6 +5,7 @@ package gp.functions
 	import gp.TFunction;
 	import gp.TNode;
 	import gp.TTerminal;
+	import flash.utils.*;
 	
 	public class DropFood extends TNode implements TFunction
 	{
