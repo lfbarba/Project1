@@ -80,7 +80,7 @@ package
 			visualLayer = new Sprite;
 			this.addChild(visualLayer);
 			
-			t = new Timer(0.01, 0);
+			t = new Timer(100, 0);
 			t.addEventListener(TimerEvent.TIMER, this.geneticAlgorithmMain);
 			
 			//botton para iniciar
