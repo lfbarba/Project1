@@ -10,6 +10,7 @@ package ga
 	import gp.targetFunctions.FunctionA;
 	import gp.targetFunctions.FunctionB;
 	import gp.targetFunctions.FunctionC;
+	import gp.targetFunctions.FunctionD;
 
 	public class Parameters extends ParametersBase
 	{	
@@ -66,6 +67,7 @@ package ga
 			targetFunction.push(new FunctionA);
 			targetFunction.push(new FunctionB);
 			targetFunction.push(new FunctionC);
+			targetFunction.push(new FunctionD);
 			targetFunctionComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			targetFunctionComboBox.dataProvider = new DataProvider(targetFunction);
 			
