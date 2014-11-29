@@ -1,5 +1,8 @@
 package
 {
+	import bkde.as3.parsers.CompiledObject;
+	import bkde.as3.parsers.MathParser;
+	
 	import flash.display.Sprite;
 	
 	import gp.FunctionTree;
@@ -9,21 +12,30 @@ package
 		public function Test()
 		{
 			super();
-			var tree:FunctionTree = new FunctionTree;
-			var tree2:FunctionTree = new FunctionTree;
-			tree.initializeRandomly(4, true);
-			tree2.initializeRandomly(4, true);
+			var mpExp:MathParser = new MathParser(["x"]);
+			var mpVal:MathParser = new MathParser([   ]);
 			
+			var compobjExp:CompiledObject = new CompiledObject();
+			var compobjVal:CompiledObject = new CompiledObject();
 			
-			trace(tree.toString(), "value", tree.evaluate(10), "size", tree.size, "depth", tree.maxDepth);
-			trace(tree2.toString(), "value", tree2.evaluate(10), "size", tree2.size, "depth", tree2.maxDepth);
-			//
-			var children:Array = tree.crossOver(tree2, false);
-			trace(children[0].toString(), "value", children[0].evaluate(10), "size", children[0].size, "depth", children[0].maxDepth);
-			trace(children[1].toString(), "value", children[1].evaluate(10), "size", children[1].size, "depth", children[1].maxDepth);
+			compobjExp = mpExp.doCompile("4*x^2 - sin(3*x^3) + 4");
+			compobjVal = mpVal.doCompile("1");
 			
-			tree.subTreeReplacementMutation();
-			trace(tree.toString(), "value", tree.evaluate(10), "size", tree.size, "depth", tree.maxDepth);
+			if (compobjVal.errorStatus == 1) {
+				trace(compobjVal.errorMes);
+				return;
+			}
+			
+			if (compobjExp.errorStatus == 1) {
+				trace(compobjExp.errorMes);
+				return;
+			}
+			
+			trace(compobjExp);
+			trace(compobjExp.PolishArray);
+			
+			var xVal:Number = mpVal.doEval(compobjVal.PolishArray, []);
+			var resVal:Number = mpExp.doEval(compobjExp.PolishArray, [xVal]);
 			
 		}
 	}
