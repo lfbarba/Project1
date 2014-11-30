@@ -7,10 +7,10 @@ package ga
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
+	import gp.targetFunctions.CustomFunction;
 	import gp.targetFunctions.FunctionA;
 	import gp.targetFunctions.FunctionB;
 	import gp.targetFunctions.FunctionC;
-	import gp.targetFunctions.FunctionD;
 
 	public class Parameters extends ParametersBase
 	{	
@@ -31,10 +31,10 @@ package ga
 			this.addEventListener(Event.ADDED_TO_STAGE, addedStageHandler);
 			super();
 			populationSizeSlideBar.minimum = 10;
-			populationSizeSlideBar.maximum = 1000;
+			populationSizeSlideBar.maximum = 2000;
 			populationSizeSlideBar.snapInterval = 10;
 			this.populationSizeSlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
-			populationSizeSlideBar.value = 200;
+			populationSizeSlideBar.value = 1000;
 			
 			
 			this.mutationProbabilitySlideBar.minimum = .0;
@@ -66,10 +66,12 @@ package ga
 			targetFunction.push({label:"Select a function"});
 			targetFunction.push(new FunctionA);
 			targetFunction.push(new FunctionB);
-			targetFunction.push(new FunctionC);
-			targetFunction.push(new FunctionD);
+			targetFunction.push(new CustomFunction);
 			targetFunctionComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			targetFunctionComboBox.dataProvider = new DataProvider(targetFunction);
+			
+			this.yourFunction.visible = false;
+			this.yourFunction.yourFunctionText.addEventListener(Event.CHANGE, this.changeHappened);
 			
 			var crossoverOptions:Array = new Array;
 			crossoverOptions.push({label:"Fair Subtree Swap Crossover", value: FairSubtreeSwapCrossover});
@@ -125,6 +127,13 @@ package ga
 		
 		public function getTargetFunction():FuncionEvaluable {
 			if(targetFunctionComboBox.selectedItem is FuncionEvaluable){
+				if(targetFunctionComboBox.selectedItem is CustomFunction){
+					var cf:CustomFunction = targetFunctionComboBox.selectedItem as CustomFunction;
+					cf.setFunction(yourFunction.yourFunctionText.text);
+					yourFunction.visible = true;
+				}else{
+					yourFunction.visible = false;
+				}
 				return this.targetFunctionComboBox.selectedItem as FuncionEvaluable;
 			} else {
 				return null;

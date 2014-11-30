@@ -112,8 +112,7 @@ package
 			if(e.parameters.getTargetFunction() != null){
 				this._grapher.clearPlots();
 				var height:Number = e.parameters.getTargetFunction().heightInInterval;
-				_grapher.drawBackground(height, Math.floor(height / 10));
-				this._grapher.plotFunction(e.parameters.getTargetFunction(), 0xFF0000);
+				this._grapher.plotFunction(e.parameters.getTargetFunction(), 0xFF0000, .1, true);
 				_targetFunction = e.parameters.getTargetFunction();
 			}else{
 				this._grapher.clearPlots();

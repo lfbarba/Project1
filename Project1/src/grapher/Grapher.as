@@ -20,6 +20,7 @@ package grapher
 		private var _bkg:Sprite;
 		private var _plottedPoints:Array;
 		private var _plot:Sprite;
+		private var _ySpread:Number;
 		
 		public function Grapher(w:Number, h:Number, min:Number, max:Number)
 		{
@@ -33,7 +34,25 @@ package grapher
 			drawBackground(200, 20);
 		}
 		
-		public function plotFunction(f:FuncionEvaluable, color:Number = 0, resolution:Number = .1):void {
+		private function computeYSpread(f:FuncionEvaluable, resolution:Number):Number {
+			var absMax:Number = 0;
+			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
+				var y:Number = f.evaluate(x);
+				absMax = Math.max(absMax, Math.abs(y));
+			}
+			if(absMax == 0 || isNaN(absMax)){
+				return 200;
+			}else{
+				return absMax*2.1;
+			}
+		}
+	
+		
+		public function plotFunction(f:FuncionEvaluable, color:Number = 0, resolution:Number = .1, baseFunction:Boolean = false):void {
+			if(baseFunction){
+				_ySpread = this.computeYSpread(f, resolution);
+				this.drawBackground(_ySpread, _ySpread/10);
+			}			
 			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
 				var y:Number = f.evaluate(x);
 				var xx:Number = x - resolution/2;
@@ -67,28 +86,35 @@ package grapher
 			this.addChildAt(_plot, 1); 
 		}
 		
-		private function coordinates(x:Number, y:Number):Point {			
-			var p:Point = new Point(x, -y);
-			 p = _bkg.localToGlobal(p);
+		private function coordinates(x:Number, y:Number):Point {
+			var xFactor:Number = _width/ (_intervalMax - _intervalMin);
+			var yFactor:Number = _height / _ySpread;
+			
+			var p:Point = new Point(xFactor* x, -yFactor* y);
+			p = _bkg.localToGlobal(p);
 			return p;
 		}
 		
-		public function drawBackground(ySpread:Number = 200, hResolution:uint = 1):void {
+		
+		public function drawBackground(ySpread:Number = 200, hResolution:Number = 1):void {
+			var xFactor:Number = _width/ (_intervalMax - _intervalMin);
+			var yFactor:Number = _height / ySpread;
+			
 			if(_bkg != null && this.contains(_bkg)){
 				this.removeChildAt(0);
 			}
 			_bkg = new Sprite;
 			this.addChildAt(_bkg, 0);
 			_bkg.graphics.beginFill(0xEEEEEE, .6);
-			_bkg.graphics.drawRect(_intervalMin, -1*ySpread/2, _intervalMax - _intervalMin, ySpread);
+			_bkg.graphics.drawRect(xFactor* _intervalMin, - yFactor*ySpread/2, xFactor * (_intervalMax - _intervalMin), yFactor*ySpread);
 			_bkg.graphics.endFill();
 			for(var i:int = Math.ceil(_intervalMin); i<= Math.floor(_intervalMax); i++){
 				var x:Number = i;
 				_bkg.graphics.lineStyle(1, 0xCCCCCC, .5, true, LineScaleMode.NONE);
 				if(i == 0)
 					_bkg.graphics.lineStyle(1, 0x333333, 1, true, LineScaleMode.NONE);
-				_bkg.graphics.moveTo(x, -1* ySpread/2);
-				_bkg.graphics.lineTo(x, ySpread);
+				_bkg.graphics.moveTo(xFactor* x, -yFactor* ySpread/2);
+				_bkg.graphics.lineTo(xFactor* x, yFactor* ySpread);
 			}
 			
 			for(i=  Math.floor(-1* ySpread/2); i< ySpread; i++){
@@ -97,12 +123,12 @@ package grapher
 					_bkg.graphics.lineStyle(1, 0xCCCCCC, .5, true, LineScaleMode.NONE);
 					if(i == 0)
 						_bkg.graphics.lineStyle(1, 0x333333, 1, true, LineScaleMode.NONE);
-					_bkg.graphics.moveTo(_intervalMin, y);
-					_bkg.graphics.lineTo(_intervalMax, y);
+					_bkg.graphics.moveTo(xFactor*_intervalMin, yFactor*y);
+					_bkg.graphics.lineTo(xFactor*_intervalMax, yFactor*y);
 				}
 			}
-			_bkg.scaleX = _width/ (_intervalMax - _intervalMin);
-			_bkg.scaleY = _height / ySpread;
+			//_bkg.scaleX = _width/ (_intervalMax - _intervalMin);
+			//_bkg.scaleY = _height / ySpread;
 			_bkg.y = _width/2 - (_width - _height)/2;
 			_bkg.x = _width/2;
 			//create plot layer
