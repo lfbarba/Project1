@@ -101,7 +101,7 @@ package
 				this.removeChild(_grapher);
 			}
 			_grapher = new Grapher(800, 620, -5, 5);
-			_grapher.x = 20;
+			_grapher.x = 30;
 			_grapher. y = 40;
 			_grapher.drawBackground(5, 1);
 			visualLayer.addChild(_grapher);

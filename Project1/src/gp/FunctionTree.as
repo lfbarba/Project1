@@ -9,6 +9,7 @@ package gp
 	import gp.functions.ExpFunction;
 	import gp.functions.ProductFunction;
 	import gp.functions.SineFunction;
+	import gp.functions.SqrtFunction;
 	import gp.functions.SubstractFunction;
 	import gp.functions.SumFunction;
 	import gp.terminals.EphemeralTerminal;
@@ -24,7 +25,7 @@ package gp
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
 			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
-				ProductFunction, SineFunction, CosineFunction);//, ExpFunction);
+				ProductFunction, SineFunction, CosineFunction, SqrtFunction);//, ExpFunction);
 			if(copyFrom != null){
 				this.root = copyFrom.root.copy();
 			}

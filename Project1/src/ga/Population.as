@@ -111,7 +111,11 @@ package ga
 				candidates.push(ind);
 			}	
 			if(Math.random() < this.tournamentSelectionProbability){
-				return best;
+				if(best != null){
+					return best;
+				}else{
+					return this.selectIndividualAtRandom(candidates);
+				}
 			}else{
 				return this.selectIndividualAtRandom(candidates);
 			}

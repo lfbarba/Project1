@@ -4,6 +4,7 @@ package grapher
 	import flash.display.Sprite;
 	import flash.geom.Point;
 	import flash.text.TextField;
+	import flash.text.TextFormat;
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
@@ -58,7 +59,7 @@ package grapher
 				var y:Number = f.evaluate(x);
 				var xx:Number = x - resolution/2;
 				var yy:Number = f.evaluate(xx);
-				_plot.graphics.lineStyle(1, color, 1, true, LineScaleMode.NONE);
+				_plot.graphics.lineStyle(1.1, color, 1, true, LineScaleMode.NONE);
 				//this.plotPoint(x, y, color);
 				if(x == _intervalMin){
 					_plot.graphics.moveTo(coordinates(x,y).x, coordinates(x,y).y);
@@ -118,21 +119,28 @@ package grapher
 				_bkg.graphics.moveTo(xFactor* x, -yFactor* ySpread/2);
 				_bkg.graphics.lineTo(xFactor* x, yFactor* ySpread);
 			}
-			trace("hResolution", hResolution);
-			trace("min", Math.floor(-1* ySpread/2), "max", ySpread);
-			for(i=  Math.floor(-1* ySpread/2); i< ySpread; i`++){
-				var y:Number = i;
-				if(y % hResolution == 0){
-					_bkg.graphics.lineStyle(1, 0xCCCCCC, .5, true, LineScaleMode.NONE);
-					if(i == 0)
-						_bkg.graphics.lineStyle(1, 0x333333, 1, true, LineScaleMode.NONE);
-					_bkg.graphics.moveTo(xFactor*_intervalMin, yFactor*y);
-					_bkg.graphics.lineTo(xFactor*_intervalMax, yFactor*y);
-					//ass also the labels
-					var t:TextField = new TextField;
-					//t.text = y;
-
-				}
+			for(var y:Number = 0; y< Math.ceil(ySpread); y= y + hResolution){
+				_bkg.graphics.lineStyle(1, 0xCCCCCC, .5, true, LineScaleMode.NONE);
+				if(y == 0)
+					_bkg.graphics.lineStyle(1, 0x333333, 1, true, LineScaleMode.NONE);
+				_bkg.graphics.moveTo(xFactor*_intervalMin, yFactor*y);
+				_bkg.graphics.lineTo(xFactor*_intervalMax, yFactor*y);
+				//
+				_bkg.graphics.moveTo(xFactor*_intervalMin, -yFactor*y);
+				_bkg.graphics.lineTo(xFactor*_intervalMax, -yFactor*y);
+				//add also the labels
+				var t:TextField = new TextField;
+				var tm:TextField = new TextField;
+				t.text = String(Math.round(y*10)/10);
+				tm.text = String(-Math.round(y*10)/10);
+				t.setTextFormat(new TextFormat("Arial", 9, 0, true, null, null, null, null, "right"));
+				tm.setTextFormat(new TextFormat("Arial", 9, 0, true, null, null, null, null, "right"));
+				t.width = tm.width = 30;
+				_bkg.addChild(t);
+				_bkg.addChild(tm);
+				t.y = -yFactor*y - 7;
+				tm.y = yFactor*y - 7;
+				tm.x = t.x = xFactor*_intervalMin - 30;
 			}
 			//_bkg.scaleX = _width/ (_intervalMax - _intervalMin);
 			//_bkg.scaleY = _height / ySpread;
@@ -144,7 +152,7 @@ package grapher
 			}
 			var rect:Sprite = new Sprite;
 			rect.graphics.beginFill(0);
-			rect.graphics.drawRect(0, 0, _width, _height);
+			rect.graphics.drawRect(-30, 0, _width+ 30, _height);
 			rect.graphics.endFill();
 			this.addChild(rect);
 			_bkg.mask = rect;
