@@ -1,5 +1,6 @@
 package gp
 {
+	import flash.geom.Point;
 	import flash.media.Camera;
 	import flash.utils.*;
 	
@@ -17,7 +18,7 @@ package gp
 	{
 		public var root:TNode;
 		private var _functionsClasses:Array;
-		private var _fitness:Number;
+		private var _fitness:Point;
 		private var _fitnessComputed:Boolean = false;
 		
 		public function FunctionTree(copyFrom:FunctionTree = null)
@@ -29,12 +30,31 @@ package gp
 			}
 		}
 		
+		public static function compareFunctionTrees(A:FunctionTree, B:FunctionTree):int {
+			if(A == null || B == null){
+				throw new Error("Arguments are null");
+			}
+			if(A.fitness.x < B.fitness.x){
+				return -1;
+			}else if(A.fitness.x > B.fitness.x){
+				return 1;
+			}else{
+				if(A.fitness.y < B.fitness.y){
+					return -1;
+				}else if(A.fitness.y > B.fitness.y){
+					return 1;
+				}else{
+					return 0;
+				}
+			}
+		}
+		
 		public function get heightInInterval():uint{
 			return 200;
 		}
 		
 		
-		public function get fitness():Number {
+		public function get fitness():Point {
 			if(!_fitnessComputed)
 				this.computeFitness();
 			return this._fitness;
@@ -49,9 +69,9 @@ package gp
 				totalDifference += Math.abs(yOpt - y);
 			}
 			if(isNaN(totalDifference) || totalDifference == Number.POSITIVE_INFINITY ){
-				this._fitness = Number.NEGATIVE_INFINITY;
+				this._fitness = new Point(Number.NEGATIVE_INFINITY, -this.size);
 			}else{
-				this._fitness = -1* totalDifference;
+				this._fitness = new Point(-1* totalDifference, -this.size);
 			}
 			_fitnessComputed = true;
 		}
