@@ -73,7 +73,8 @@ package
 			//botton para iniciar
 			startButton = new Button;
 			stopButton = new Button;
-			startButton.x = startButton. y  = stopButton.y = 20;
+			startButton.x = 20;
+			startButton. y  = stopButton.y = 10;
 			stopButton.x = 140;
 			startButton.label = "Start GP";
 			stopButton.label = "Stop GP";
@@ -99,7 +100,9 @@ package
 			if(_grapher != null && this.contains(_grapher)){
 				this.removeChild(_grapher);
 			}
-			_grapher = new Grapher(800, 600, -5, 5);
+			_grapher = new Grapher(800, 620, -5, 5);
+			_grapher.x = 20;
+			_grapher. y = 40;
 			_grapher.drawBackground(5, 1);
 			visualLayer.addChild(_grapher);
 		}
@@ -175,7 +178,7 @@ package
 			var min:Number = -1* this.mainPopulation.minimum;
 			var avg:Number = -1*this.mainPopulation.average;
 			var best:Number = -1* this.bestFitness;
-			var current:Number = -1* mainPopulation.getElement(0).fitness;
+			var current:Number = -1* mainPopulation.getElement(0).fitness.x;
 			this.parameters.updateStatistics(Math.round(max*100)/100, Math.round(min*100)/100, 
 				Math.round(avg*100)/100, Math.round(best*100)/100, Math.round(current*100)/100, this.bestIndividual);
 		}
@@ -185,13 +188,14 @@ package
 		private function runOneGeneration():void {
 			mainPopulation.sortByFitness(Array.DESCENDING | Array.NUMERIC);
 			mainPopulation.computePopulationFitness();
-			reportStatistics();
 			//show the best individual so far
 			var best:FunctionTree = mainPopulation.getElement(0);
-			if(best.fitness  >  bestFitness){
-				bestFitness = best.fitness;
+			if(bestIndividual == null || FunctionTree.compareFunctionTrees(best, bestIndividual) > 0){
+				bestFitness = best.fitness.x;
 				bestIndividual = new FunctionTree(best);
 			}
+			reportStatistics();
+			
 			this.showIndividual(mainPopulation.getElement(0));
 			
 			var newPopulation:Population = new Population(parameters);

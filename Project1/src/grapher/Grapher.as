@@ -3,6 +3,7 @@ package grapher
 	import flash.display.LineScaleMode;
 	import flash.display.Sprite;
 	import flash.geom.Point;
+	import flash.text.TextField;
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
@@ -51,7 +52,7 @@ package grapher
 		public function plotFunction(f:FuncionEvaluable, color:Number = 0, resolution:Number = .1, baseFunction:Boolean = false):void {
 			if(baseFunction){
 				_ySpread = this.computeYSpread(f, resolution);
-				this.drawBackground(_ySpread, _ySpread/10);
+				this.drawBackground(_ySpread, Math.floor(10*_ySpread/10)/10);
 			}			
 			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
 				var y:Number = f.evaluate(x);
@@ -92,6 +93,7 @@ package grapher
 			
 			var p:Point = new Point(xFactor* x, -yFactor* y);
 			p = _bkg.localToGlobal(p);
+			p = this.globalToLocal(p);
 			return p;
 		}
 		
@@ -116,8 +118,9 @@ package grapher
 				_bkg.graphics.moveTo(xFactor* x, -yFactor* ySpread/2);
 				_bkg.graphics.lineTo(xFactor* x, yFactor* ySpread);
 			}
-			
-			for(i=  Math.floor(-1* ySpread/2); i< ySpread; i++){
+			trace("hResolution", hResolution);
+			trace("min", Math.floor(-1* ySpread/2), "max", ySpread);
+			for(i=  Math.floor(-1* ySpread/2); i< ySpread; i`++){
 				var y:Number = i;
 				if(y % hResolution == 0){
 					_bkg.graphics.lineStyle(1, 0xCCCCCC, .5, true, LineScaleMode.NONE);
@@ -125,6 +128,10 @@ package grapher
 						_bkg.graphics.lineStyle(1, 0x333333, 1, true, LineScaleMode.NONE);
 					_bkg.graphics.moveTo(xFactor*_intervalMin, yFactor*y);
 					_bkg.graphics.lineTo(xFactor*_intervalMax, yFactor*y);
+					//ass also the labels
+					var t:TextField = new TextField;
+					//t.text = y;
+
 				}
 			}
 			//_bkg.scaleX = _width/ (_intervalMax - _intervalMin);

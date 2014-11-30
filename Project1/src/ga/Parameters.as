@@ -159,7 +159,7 @@ package ga
 			this.maxFitness.text  = String(max);
 			this.minFitness.text = String(min);
 			this.avgFitness.text = String(avg);
-			this.bestFitness.text = String(best);
+			this.bestFitness.text = String(bestFunction.size)+","+String(best);
 			this.currentFitness.text = String(current);
 			if(bestFunction != null){
 				this.bestFunction.text = bestFunction.toString();
