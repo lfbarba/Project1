@@ -40,6 +40,7 @@ package gp
 			return this._fitness;
 		}
 		
+		
 		private function computeFitness():void {
 			var totalDifference:Number = 0;
 			for(var x:Number = -5; x <= 5; x= x+.5){

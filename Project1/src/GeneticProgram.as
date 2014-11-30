@@ -176,8 +176,8 @@ package
 			var avg:Number = -1*this.mainPopulation.average;
 			var best:Number = -1* this.bestFitness;
 			var current:Number = -1* mainPopulation.getElement(0).fitness;
-			this.parameters.updateStatistics(Math.round(max), Math.round(min), 
-				Math.round(avg), Math.round(best), Math.round(current), this.bestIndividual);
+			this.parameters.updateStatistics(Math.round(max*100)/100, Math.round(min*100)/100, 
+				Math.round(avg*100)/100, Math.round(best*100)/100, Math.round(current*100)/100, this.bestIndividual);
 		}
 		
 
