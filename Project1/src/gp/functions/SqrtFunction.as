@@ -1,11 +1,14 @@
 package gp.functions
 {
+	import flash.display.Sprite;
+	
 	import gp.TFunction;
 	import gp.TNode;
-
+	
 	public class SqrtFunction extends TNode implements TFunction
 	{
 		private var arg1:TNode;
+		public static var icon:Sprite = new sqrtIcon as Sprite;
 		
 		public function SqrtFunction()
 		{
@@ -35,7 +38,11 @@ package gp.functions
 		
 		override public function get value():* {
 			setArgs();
-			return Math.sqrt(arg1.value);
+			if(isNaN(Math.sqrt(arg1.value))){
+				return 0;
+			}else{
+				return Math.sqrt(arg1.value);
+			}
 		}
 		
 		override public function toString():String {

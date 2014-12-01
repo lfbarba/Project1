@@ -1,11 +1,14 @@
 package gp.functions
 {
+	import flash.display.Sprite;
+	
 	import gp.TFunction;
 	import gp.TNode;
 
 	public class SineFunction extends TNode implements TFunction
 	{
 		private var arg1:TNode;
+		public static var icon:Sprite = new sinIcon as Sprite;
 		
 		public function SineFunction()
 		{

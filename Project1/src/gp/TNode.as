@@ -1,5 +1,6 @@
 package gp
 {
+	import flash.display.Sprite;
 	import flash.utils.*;
 	
 	import gp.terminals.EphemeralTerminal;
@@ -10,6 +11,8 @@ package gp
 		private var _identifier:String;
 		public var children:Array;
 		private var _numChildren:uint = 0;
+		
+		public static var icon:Sprite;
 		
 		private var _parent:TNode;
 		

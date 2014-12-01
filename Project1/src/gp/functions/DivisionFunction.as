@@ -1,5 +1,7 @@
 package gp.functions
 {
+	import flash.display.Sprite;
+	
 	import gp.TFunction;
 	import gp.TNode;
 
@@ -7,6 +9,7 @@ package gp.functions
 	{
 		private var arg1:TNode;
 		private var arg2:TNode;
+		public static var icon:Sprite = new divisionIcon as Sprite;
 		
 		public function DivisionFunction()
 		{
@@ -40,7 +43,7 @@ package gp.functions
 			if(arg2.value != 0){
 				return arg1.value / arg2.value;
 			}else{
-				return Number.POSITIVE_INFINITY; 
+				return 0; 
 			}
 		}
 		

@@ -27,7 +27,11 @@ package gp.targetFunctions
 		public function evaluate(x:Number):Number
 		{
 			var resVal:Number = mpExp.doEval(compobjExp.PolishArray, [x]);
-			return resVal;
+			if(isNaN(resVal)){
+				return 0;
+			}else{	
+				return resVal;
+			}
 		}
 		
 		public function get heightInInterval():uint{

@@ -4,6 +4,7 @@ package ga
 	import fl.events.SliderEvent;
 	
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
@@ -11,6 +12,8 @@ package ga
 	import gp.targetFunctions.FunctionA;
 	import gp.targetFunctions.FunctionB;
 	import gp.targetFunctions.FunctionC;
+	
+	import grapher.FunctionChooser;
 
 	public class Parameters extends ParametersBase
 	{	
@@ -24,6 +27,9 @@ package ga
 		
 		public static var SubTreeReplacementMutation:uint = 0;
 		
+		private var _customFunction:CustomFunction;
+		
+		private var chooser:FunctionChooser;
 		
 		public function Parameters()
 		{
@@ -41,7 +47,7 @@ package ga
 			this.mutationProbabilitySlideBar.maximum = 1;
 			this.mutationProbabilitySlideBar.snapInterval = .01
 			mutationProbabilitySlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
-			mutationProbabilitySlideBar.value = .28;
+			mutationProbabilitySlideBar.value = .5;
 			
 			crossoverProbabilitySlideBar.minimum = .0;
 			crossoverProbabilitySlideBar.maximum = 1;
@@ -62,15 +68,8 @@ package ga
 			tournamentSelectionParameters.tournamentProbabilitySlideBar.addEventListener(SliderEvent.THUMB_DRAG, changeHappened);
 			tournamentSelectionParameters.tournamentProbabilitySlideBar.value = .54;
 			
-			var targetFunction:Array = new Array;
-			targetFunction.push({label:"Select a function"});
-			targetFunction.push(new FunctionA);
-			targetFunction.push(new FunctionB);
-			targetFunction.push(new CustomFunction);
-			targetFunctionComboBox.addEventListener(Event.CHANGE, this.changeHappened);
-			targetFunctionComboBox.dataProvider = new DataProvider(targetFunction);
-			
-			this.yourFunction.visible = false;
+
+			this._customFunction = new CustomFunction;
 			this.yourFunction.yourFunctionText.addEventListener(Event.CHANGE, this.changeHappened);
 			
 			var crossoverOptions:Array = new Array;
@@ -83,10 +82,19 @@ package ga
 			mutationOptions.push({label:"SubTree Replacement Mutation", value: SubTreeReplacementMutation});
 			mutationComboBox.addEventListener(Event.CHANGE, this.changeHappened);
 			this.mutationComboBox.dataProvider = new DataProvider(mutationOptions);
+			//
+			chooser = new FunctionChooser;
+			chooser.visible = false;
+			this.chooseFunctionSetButton.addEventListener(MouseEvent.CLICK, chooser.open);
+		}
+		
+		public function getFunctionSet():Array {
+			return this.chooser.selectedFunctions;
 		}
 		
 		private function addedStageHandler(e:Event):void {
 			this.changeHappened();
+			this.stage.addChild(chooser);
 		}
 		
 		public function updateNumGenerations(round:uint):void {
@@ -126,18 +134,8 @@ package ga
 		}
 		
 		public function getTargetFunction():FuncionEvaluable {
-			if(targetFunctionComboBox.selectedItem is FuncionEvaluable){
-				if(targetFunctionComboBox.selectedItem is CustomFunction){
-					var cf:CustomFunction = targetFunctionComboBox.selectedItem as CustomFunction;
-					cf.setFunction(yourFunction.yourFunctionText.text);
-					yourFunction.visible = true;
-				}else{
-					yourFunction.visible = false;
-				}
-				return this.targetFunctionComboBox.selectedItem as FuncionEvaluable;
-			} else {
-				return null;
-			}
+			_customFunction.setFunction(yourFunction.yourFunctionText.text);
+			return _customFunction as FuncionEvaluable;
 		}
 		
 		

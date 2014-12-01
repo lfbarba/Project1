@@ -4,6 +4,8 @@ package gp
 	import flash.media.Camera;
 	import flash.utils.*;
 	
+	import ga.Parameters;
+	
 	import gp.functions.CosineFunction;
 	import gp.functions.DivisionFunction;
 	import gp.functions.ExpFunction;
@@ -18,14 +20,11 @@ package gp
 	public class FunctionTree implements FuncionEvaluable
 	{
 		public var root:TNode;
-		private var _functionsClasses:Array;
 		private var _fitness:Point;
 		private var _fitnessComputed:Boolean = false;
 		
 		public function FunctionTree(copyFrom:FunctionTree = null)
 		{
-			_functionsClasses = new Array(SumFunction, SubstractFunction, DivisionFunction, 
-				ProductFunction, SineFunction, CosineFunction, SqrtFunction);//, ExpFunction);
 			if(copyFrom != null){
 				this.root = copyFrom.root.copy();
 			}
@@ -179,7 +178,8 @@ package gp
 		
 		
 		public function getRandomFunctionNode():TFunction {
-			var c:Class = this._functionsClasses[Math.floor(Math.random() * _functionsClasses.length)];
+			var functionsClasses:Array = Parameters.inst.getFunctionSet();
+			var c:Class = functionsClasses[Math.floor(Math.random() * functionsClasses.length)];
 			return new c;
 		}
 		

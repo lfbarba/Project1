@@ -9,7 +9,6 @@ package grapher
 	import gp.FuncionEvaluable;
 	import gp.FunctionTree;
 	import gp.TFunction;
-	import gp.targetFunctions.FunctionA;
 	
 	public class Grapher extends Sprite
 	{
@@ -40,7 +39,8 @@ package grapher
 			var absMax:Number = 0;
 			for(var x:Number = _intervalMin; x < _intervalMax; x = x + resolution){
 				var y:Number = f.evaluate(x);
-				absMax = Math.max(absMax, Math.abs(y));
+				if(!isNaN(Math.abs(y)))
+					absMax = Math.max(absMax, Math.abs(y));
 			}
 			if(absMax == 0 || isNaN(absMax)){
 				return 200;
@@ -152,7 +152,7 @@ package grapher
 			}
 			var rect:Sprite = new Sprite;
 			rect.graphics.beginFill(0);
-			rect.graphics.drawRect(-30, 0, _width+ 30, _height);
+			rect.graphics.drawRect(-30, -20, _width+ 30, _height+40);
 			rect.graphics.endFill();
 			this.addChild(rect);
 			_bkg.mask = rect;

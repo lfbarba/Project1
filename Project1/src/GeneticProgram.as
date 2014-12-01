@@ -36,7 +36,7 @@ package
 		
 		private var convergenceTreshhold:Number = .000001;
 		
-		private var maxNumGenerations:uint = 1000;
+		private var maxNumGenerations:uint = 500;
 		public static var numGenerations:uint = 0;
 		
 		
@@ -100,7 +100,7 @@ package
 			if(_grapher != null && this.contains(_grapher)){
 				this.removeChild(_grapher);
 			}
-			_grapher = new Grapher(800, 620, -5, 5);
+			_grapher = new Grapher(780, 650, -5, 5);
 			_grapher.x = 30;
 			_grapher. y = 40;
 			_grapher.drawBackground(5, 1);
@@ -145,7 +145,8 @@ package
 				//
 				numGenerations++;
 			}
-			t.start();
+			if(numGenerations < this.maxNumGenerations)
+				t.start();
 		}
 		
 		private function populationHasConverged():Boolean {

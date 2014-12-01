@@ -1,5 +1,7 @@
 package gp.functions
 {
+	import flash.display.Sprite;
+	
 	import gp.TFunction;
 	import gp.TNode;
 
@@ -7,6 +9,7 @@ package gp.functions
 	{
 		private var arg1:TNode;
 		private var arg2:TNode;
+		public static var icon:Sprite = new productIcon as Sprite;
 		
 		public function ProductFunction()
 		{
